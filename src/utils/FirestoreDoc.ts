@@ -1,18 +1,12 @@
-// import * as admin from "firebase-admin";
 import * as admin from "firebase-admin";
 import { DocumentData, DocumentSnapshot } from "@google-cloud/firestore";
 import { Maybe, isUndefined } from "./Maybe";
 
-// import { runInThisContext } from "vm";
 
 type Firestore = admin.firestore.Firestore;
 
 export type FirestoreDocTypes = {
-  // docName: string,
   orgId: string,
-  // id: string,
-  // createdAt: Date,
-  // updatedAt: Date,
   id: Maybe<string>
   createdAt: Maybe<Date>
   updatedAt: Maybe<Date> 
@@ -21,19 +15,11 @@ export type FirestoreDocTypes = {
 
 export class FirestoreDoc<T> {
   firestore: Firestore
-  // orgId: string
   props: T & FirestoreDocTypes;
   docName: Maybe<string> = undefined;
-  // id: Maybe<string> = undefined;
-  // createdAt: Maybe<Date> = undefined;
-  // updatedAt: Maybe<Date> = undefined;
 
   constructor(firestore: Firestore, orgId: string, props: T) {
     this.firestore = firestore;
-    
-    // this.orgId = orgId;
-    // this.props = props;
-
     this.props = {
       ...props,
       orgId,
@@ -45,7 +31,6 @@ export class FirestoreDoc<T> {
 
 
   public create(): Promise<FirestoreDoc<T>> {
-    //TODO: make sure docname isn't null;
     if (isUndefined(this.docName)) {
       throw new Error("called create() on firestoredoc, but docname is undefined.");
     }
@@ -119,10 +104,8 @@ export class FirestoreDoc<T> {
     batch.delete(ref);
   }
 
-  //TD: this should be abstract, but TS doesn't allow for abstract methods
   public serialize(): DocumentData {
     return this.props;
-    // throw new Error(`Serialize not implemented for class: ${this.docName}`);
   }
 
   public underlyingProps(): T {

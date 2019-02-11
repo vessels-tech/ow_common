@@ -1,13 +1,14 @@
+
 import { FirestoreDoc } from "../utils/FirestoreDoc";
-import { AnyReading } from "./Reading";
 import DocNames from "../enums/DocNames";
+import { ShortId } from './ShortId';
 import { Firestore } from "@google-cloud/firestore";
 
-export class ReadingDoc extends FirestoreDoc<AnyReading> {
-  static docName = DocNames.Reading;
+export class ShortIdDoc extends FirestoreDoc<ShortId> {
+  static docName = DocNames.ShortId;
 
-  public static get<AnyReading>(firestore: Firestore, orgId: string, id: string): Promise<FirestoreDoc<AnyReading>> {
-    const transform = (data: any): AnyReading => {
+  public static get<ShortId>(firestore: Firestore, orgId: string, id: string): Promise<FirestoreDoc<ShortId>> {
+    const transform = (data: any): ShortId => {
       //Convert the different potential serialized readings into a proper AnyReading here
       return data;
     }
