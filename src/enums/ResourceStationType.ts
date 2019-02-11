@@ -1,4 +1,4 @@
-enum ResourceType {
+enum ResourceStationType {
   well = 'well',
   raingauge = 'raingauge',
   checkdam = 'checkdam',
@@ -6,4 +6,4 @@ enum ResourceType {
   custom = 'custom',
 }
 
-export default ResourceType;
+export default ResourceStationType;

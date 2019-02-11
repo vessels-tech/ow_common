@@ -4,10 +4,9 @@ import DocNames from "../enums/DocNames";
 import { MyWellExternalIds } from "./ExternalIds";
 import { Maybe } from "../utils/Maybe";
 import { ReadingDoc } from "./ReadingDoc";
-import ResourceType from "../enums/ResourceType";
+import ResourceStationType from "../enums/ResourceStationType";
 
 
-//TODO: should this be a generic enum? or defined per type?
 export enum ReadingType {
   Any = 'Any',
   MyWell = 'MyWell',
@@ -16,13 +15,12 @@ export enum ReadingType {
 
 
 export type Reading =  BaseReading | MyWellReading | GGMNReading;
-export type PendingReading = BasePendingReading | PendingMyWellReading | PendingGGMNReading;
 export type BaseReading = {
   type: ReadingType;
 
   datetime: string; //iso formatted string
   resourceId: string;
-  resourceType: ResourceType
+  resourceType: ResourceStationType
   timeseriesId: string,
   value: number;
 };
@@ -40,18 +38,26 @@ type MyWellReadingProps = {
 
 type GGMNReadingProps = {
   type: ReadingType.GGMN,
-  resourceType: ResourceType.well,
+  resourceType: ResourceStationType.well,
 }
 
 export type MyWellReading = BaseReading & MyWellReadingProps;
 export type GGMNReading = BaseReading & GGMNReadingProps;
+
+
+/**
+ * Pending Types
+ * 
+ * Represents an incomplete or pending version of Reading
+ */
+export type PendingReading = BasePendingReading | PendingMyWellReading | PendingGGMNReading;
 
 export type BasePendingReading = {
   pending: true,
 
   datetime: string; //iso formatted string
   resourceId: Maybe<string>;
-  resourceType: ResourceType,
+  resourceType: ResourceStationType,
   timeseriesId: Maybe<string>,
   value: number;
 }
