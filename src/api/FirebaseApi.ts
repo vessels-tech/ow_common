@@ -20,7 +20,7 @@ class FirebaseApi {
   firestore: Firestore;
   orgId: string;
 
-  constructor(firestore: any, orgId: string) {
+  constructor(firestore: Firestore, orgId: string) {
     this.firestore = firestore;
     this.orgId = orgId;
 
@@ -89,5 +89,6 @@ class FirebaseApi {
   }
 
 
-
 }
+
+export default FirebaseApi;
