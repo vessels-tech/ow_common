@@ -1,9 +1,10 @@
 import * as admin from "firebase-admin";
-import { DocumentData, DocumentSnapshot } from "@google-cloud/firestore";
-import { Maybe, isUndefined } from "./Maybe";
-
-
 type Firestore = admin.firestore.Firestore;
+import { DocumentData, DocumentSnapshot, SetOptions } from "@google-cloud/firestore";
+import { Maybe, isUndefined } from "./Maybe";
+import { SomeResult, makeSuccess, makeError } from "./AppProviderTypes";
+
+
 
 export type FirestoreDocTypes = {
   orgId: string,
@@ -30,7 +31,7 @@ export class FirestoreDoc<T> {
   }
 
 
-  public create(): Promise<FirestoreDoc<T>> {
+  public create(): Promise<SomeResult<FirestoreDoc<T>>> {
     if (isUndefined(this.docName)) {
       throw new Error("called create() on firestoredoc, but docname is undefined.");
     }
@@ -42,7 +43,7 @@ export class FirestoreDoc<T> {
     return this.save();
   }
 
-  public save(): Promise<FirestoreDoc<T>> {
+  public save(options?: SetOptions): Promise<SomeResult<FirestoreDoc<T>>> {
     this.props.updatedAt = new Date();
 
     if (isUndefined(this.props.id)) {
@@ -54,8 +55,9 @@ export class FirestoreDoc<T> {
     }
     
     return this.firestore.collection('org').doc(this.props.orgId).collection(this.docName).doc(this.props.id)
-      .set(this.serialize())
-      .then(ref => { return this; });
+      .set(this.serialize(), options)
+      .then(ref => makeSuccess(this))
+      .catch((err: Error) => makeError(err.message));
   }
 
   /**
@@ -113,7 +115,7 @@ export class FirestoreDoc<T> {
   }
 
   //We use U here as static superclasses can't infer the generic type T
-  public static _get<U>(firestore: Firestore, docName: string, orgId: string, id: string, transform: (data: any) => U): Promise<FirestoreDoc<U>> {
+  public static _get<U>(firestore: Firestore, docName: string, orgId: string, id: string, transform: (data: any) => U): Promise<SomeResult<FirestoreDoc<U>>> {
 
     return firestore.collection('org').doc(orgId).collection(docName).doc(id).get()
       .then((sn: DocumentSnapshot) => {
@@ -123,8 +125,9 @@ export class FirestoreDoc<T> {
         }
         const parsed: U = transform(data);
         const doc: FirestoreDoc<U> = new FirestoreDoc<U>(firestore, orgId, parsed);
-        return doc;
+        return makeSuccess(doc);
       })
+      .catch((err: Error) => makeError<FirestoreDoc<U>>(err.message))
   }
 
 }

@@ -35,14 +35,16 @@ type GGMNResourceProps = {
   waterColumnHeight: number,
 }
 
+
+export type MyWellResource = BaseResource & MyWellResourceProps;
+export type GGMNResource = BaseResource & GGMNResourceProps;
+
 /**
  * Pending Types
  *
  * Represents an incomplete or pending version of Resource
  */
-
-export type MyWellResource = BaseResource & MyWellResourceProps;
-export type GGMNResource = BaseResource & GGMNResourceProps;
+export type PendingResource = BasePendingResource | PendingMyWellResource | PendingGGMNResource;
 
 export type BasePendingResource = {
   pending: true,
