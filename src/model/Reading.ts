@@ -1,18 +1,12 @@
-import { FirestoreDoc } from "../utils/FirestoreDoc";
-import { DocumentData, Firestore } from "@google-cloud/firestore";
-import DocNames from "../enums/DocNames";
 import { MyWellExternalIds } from "./ExternalIds";
 import { Maybe } from "../utils/Maybe";
-import { ReadingDoc } from "./ReadingDoc";
 import ResourceStationType from "../enums/ResourceStationType";
-
 
 export enum ReadingType {
   Any = 'Any',
   MyWell = 'MyWell',
   GGMN = 'GGMN',
 }
-
 
 export type Reading =  BaseReading | MyWellReading | GGMNReading;
 export type BaseReading = {
@@ -66,24 +60,4 @@ export type BasePendingReading = {
 //MyWell and GGMN reading props
 export type PendingMyWellReading = BasePendingReading & MyWellReadingProps;
 export type PendingGGMNReading = BasePendingReading & GGMNReadingProps;
-
-
-// const mywellReading: AnyReading = {
-//   type: ReadingType.MyWell,
-//   isLegacy: false,
-//   datetime: "12345",
-//   value: 10,
-//   resourceId: "213",
-//   resourceType: ResourceType.well,
-//   timeseriesId: "1234",
-// };
-
-
-// const myWellReadingDoc = new ReadingDoc(mywellReading);
-// myWellReadingDoc.create()
-
-// const getTheDoc = async () => {
-//   const doc: FirestoreDoc<MyWellReading> = await ReadingDoc.get<MyWellReading>(firestore, 'mywell', "1234");
-//   const myReading: MyWellReading = doc.underlyingProps();
-// }
 

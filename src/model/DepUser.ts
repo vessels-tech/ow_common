@@ -1,6 +1,7 @@
 import { PendingReading } from "./Reading";
 import UserStatus from "../enums/UserStatus";
 import { TranslationEnum } from "ow_translations";
+import { Resource } from "./Resource";
 
 
 /**
@@ -14,7 +15,7 @@ import { TranslationEnum } from "ow_translations";
 
 export type DepUser = {
   userId: string,
-  recentResources: AnyResource[],
+  recentResources: Resource[],
   favouriteResources: AnyResource[],
   pendingSavedReadings: PendingReading[],
   pendingSavedResources: PendingResource[],
