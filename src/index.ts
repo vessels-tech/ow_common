@@ -10,9 +10,10 @@ import { UserApi } from './api/';
 
 import * as enums from './enums';
 
-export namespace Api {
+const Api = {
   UserApi
-}
+};
+
 
 // export namespace Enums {
 //   Docnames
@@ -21,6 +22,11 @@ export namespace Api {
 //   UserType
 // }
 
-export namespace Enums {
-  enums
+const Enums = {
+  ...enums
 }
+
+export default {
+  Api,
+  Enums,
+};
