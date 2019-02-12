@@ -10,7 +10,6 @@ import { DocumentReference } from "@google-cloud/firestore";
 type Firestore = admin.firestore.Firestore;
 
 
-
 export class UserApi {
   firestore: Firestore;
   orgId: string;

@@ -10,7 +10,7 @@ dir = $(shell pwd)
 all: build
 
 build:
-	# @make unit-test
+	@make unit-test
 	yarn run build
 
 type-check:
@@ -22,5 +22,9 @@ build-watch:
 unit-test:
 	@make type-check
 	yarn run unit
+
+publish:
+	@echo 'Publishing to NPM!'
+	npm publish
 
 .PHONY: build
