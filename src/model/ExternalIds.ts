@@ -5,7 +5,6 @@ export enum ExternalIdsType {
   MyWell = 'MyWell',
 }
 
-
 export type ExternalIds = MyWellExternalIds;
 
 export type MyWellExternalIds = {
