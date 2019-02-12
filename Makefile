@@ -10,13 +10,17 @@ dir = $(shell pwd)
 all: build
 
 build:
+	# @make unit-test
 	yarn run build
 
-clean:
-	rm -rf ${dir}/src/common/*
+type-check:
+	yarn run type-check
 
+build-watch:
+	yarn run type-check:watch
 
 unit-test:
+	@make type-check
 	yarn run unit
 
 .PHONY: build
