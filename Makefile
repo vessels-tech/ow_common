@@ -5,6 +5,7 @@
 
 PATH := node_modules/.bin:$(PATH)
 dir = $(shell pwd)
+NPM_VERSION_NUMBER := $(shell node ./tools/getVersionNumber.js)
 
 
 all: build
@@ -24,7 +25,10 @@ unit-test:
 	yarn run unit
 
 publish:
-	@echo 'Publishing to NPM!'
+	@echo 'Publishing $(NPM_VERSION_NUMBER) to NPM!'
 	npm publish
+	git tag $(NPM_VERSION_NUMBER)
+	git push origin $(NPM_VERSION_NUMBER)
+
 
 .PHONY: build
