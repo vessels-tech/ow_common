@@ -1,10 +1,13 @@
+import * as admin from "firebase-admin";
 import { Resource } from "../model/Resource";
 import { SomeResult, ResultType, makeSuccess, makeError } from "../utils/AppProviderTypes";
 import DictType from "../utils/DictType";
+import { User, DefaultUser } from "../model/User";
+import UserStatus from "../enums/UserStatus";
+import UserType from "../enums/UserType";
+import { DocumentReference } from "@google-cloud/firestore";
 
 type Firestore = admin.firestore.Firestore;
-
-
 
 
 
@@ -16,11 +19,6 @@ export class UserApi {
     this.firestore = firestore;
     this.orgId = orgId;
   }
-
-  
-  //
-  // User
-  // ------------------------------------
 
   public async addFavouriteResource(userId: string, resource: Resource): Promise<SomeResult<void>> {
     const favouritesResult = await this.getFavouriteResources(userId);
@@ -45,48 +43,69 @@ export class UserApi {
   }
 
   private async updateFavouriteResources(userId: string, favouriteResources: DictType<Resource>): Promise<SomeResult<any>> {
-    //First we get the user - maybe there's a better way to do this...
-    const result = await UserDoc.get<User>(this.firestore, this.orgId, userId);
-    if (result.type === ResultType.ERROR) {
-      return result;
-    }
-
-    const userDoc = result.result;
-    userDoc.props = {
-      ...userDoc.props,
-      favouriteResources,
-    };
-
-    return userDoc.save();
-
+    return this.userRef(this.orgId, userId).set({ favouriteResources }, { merge: true })
+      .then(() => makeSuccess(undefined))
+      .catch((err: Error) => makeError(err.message))
   }
 
-  private async getFavouriteResources(userId: string): Promise<SomeResult<DictType<Resource>>> {
-    const result = await UserDoc.get<User>(this.firestore, this.orgId, userId);
-    if (result.type === ResultType.ERROR) {
-      return result;
+  public async getFavouriteResources(userId: string): Promise<SomeResult<DictType<Resource>>> {
+    const userResult = await this.getUser(this.userRef(this.orgId, userId));
+    if (userResult.type === ResultType.ERROR) {
+      return userResult;
     }
 
-    const user = result.result.underlyingProps();
+    const user = userResult.result;
     return makeSuccess(user.favouriteResources);
   }
 
-  public getRecentResources(userId: string): Promise<SomeResult<Resource[]>> {
-    return null;
-  }
+  public async getRecentResources(userId: string): Promise<SomeResult<Resource[]>> {
+    const userResult = await this.getUser(this.userRef(this.orgId, userId));
+    if (userResult.type === ResultType.ERROR) {
+      return userResult;
+    }
 
-  public addRecentResource(userId: string, resource: Resource): Promise<SomeResult<Resource[]>> {
-    return null;
+    const user = userResult.result;
+    return makeSuccess(user.recentResources);
   }
 
   /**
    * Change the user's status
    */
-  public async changeUserStatus(orgId: string, userId: string, status: 'Approved' | 'Rejected'): Promise<SomeResult<void>> {
-    return this.firestore.collection('org').doc(orgId).collection('user').doc(userId).set({ status }, { merge: true })
+  public async changeUserStatus(userId: string, status: UserStatus.Approved | UserStatus.Rejected): Promise<SomeResult<void>> {
+    return this.userRef(this.orgId, userId).set({ status }, { merge: true })
       .then(() => makeSuccess(undefined))
       .catch((err: Error) => makeError(err.message))
   }
 
+  public async changeUserType(userId: string, type: UserType): Promise<SomeResult<void>> {
+    return this.userRef(this.orgId, userId).set({type}, { merge: true})
+    .then(() => makeSuccess(undefined))
+  }
+
+
+  //
+  // Helpers
+  // ------------------------------------
+
+  public userRef(orgId: string, userId: string): DocumentReference {
+    return this.firestore.collection('org').doc(orgId).collection('user').doc(userId);
+  }
+
+  public async getUser(userRef: DocumentReference): Promise<SomeResult<User>> {
+    return userRef.get()
+    .then(sn => {
+      const data = sn.data();
+      if (!data) {
+        return makeError<User>(`No data found for userRef:${userRef}`);
+      }
+
+      //Set the default user data here.
+      return makeSuccess({
+        ...DefaultUser,
+        ...data
+      });
+    })
+    .catch((err: Error) => makeError<User>(err.message))
+  }
 
 }

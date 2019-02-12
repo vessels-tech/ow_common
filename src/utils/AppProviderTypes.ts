@@ -41,6 +41,21 @@ export function isError(result: SomeResult<any>) {
 
 
 /**
+ * unsafeUnwrap
+ * 
+ * Unwrap a result unsafelty. Similar to Rust
+ * Throws error if result.type === ResultError
+ */
+export function unsafeUnwrap<T>(result: SomeResult<T>): T {
+  if (result.type === ResultType.ERROR) {
+    throw new Error(result.message);
+  }
+
+  return result.result;
+}
+
+
+/**
  * Reduces a list of SomeResults and returns if any of them contain an error
  */
 export function resultsHasError(results: Array<SomeResult<any>>): boolean {
