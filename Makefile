@@ -24,11 +24,14 @@ unit-test:
 	@make type-check
 	yarn run unit
 
+
 publish:
+	# TODO: look into using npm patch instead!
 	@echo 'Publishing $(NPM_VERSION_NUMBER) to NPM!'
 	npm publish
 	git tag $(NPM_VERSION_NUMBER)
 	git push origin $(NPM_VERSION_NUMBER)
+
 
 
 .PHONY: build
