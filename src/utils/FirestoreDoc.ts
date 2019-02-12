@@ -1,3 +1,14 @@
+/**
+ * FirestoreDoc
+ * 
+ * This is a second pass at a kind of ORM for Firestore.
+ * It has many issues, and so shouldn't be used as of yet, 
+ * but can hopefully inform future work in this area.
+ * 
+ * 
+ */
+
+
 import * as admin from "firebase-admin";
 type Firestore = admin.firestore.Firestore;
 import { DocumentData, DocumentSnapshot, SetOptions } from "@google-cloud/firestore";

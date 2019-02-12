@@ -22,7 +22,10 @@
     "typescript": "^3.0.3"
   },
   "dependencies": {
+    "@types/mocha": "^5.2.5",
     "firebase-admin": "^7.0.0",
-    "ow_translations": "git://github.com/vessels-tech/ow_translations"
+    "mocha": "^5.2.0",
+    "ow_translations": "git://github.com/vessels-tech/ow_translations",
+    "ts-mocha": "^2.0.0"
   }
 }
