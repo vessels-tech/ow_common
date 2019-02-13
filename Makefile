@@ -10,6 +10,9 @@ NPM_VERSION_NUMBER := $(shell node ./tools/getVersionNumber.js)
 
 all: build
 
+install:
+	yarn
+
 build:
 	@make unit-test
 	yarn run build

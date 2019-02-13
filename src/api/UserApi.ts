@@ -1,14 +1,13 @@
-import * as admin from "firebase-admin";
 import { Resource } from "../model/Resource";
 import { SomeResult, ResultType, makeSuccess, makeError } from "../utils/AppProviderTypes";
 import DictType from "../utils/DictType";
 import { User, DefaultUser } from "../model/User";
 import UserStatus from "../enums/UserStatus";
 import UserType from "../enums/UserType";
+import * as admin  from "firebase-admin";
 import { DocumentReference } from "@google-cloud/firestore";
 
 type Firestore = admin.firestore.Firestore;
-
 
 export class UserApi {
   firestore: Firestore;
