@@ -1,6 +1,6 @@
 {
   "name": "ow_common",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
@@ -24,6 +24,8 @@
     "typescript": "3.3.3"
   },
   "dependencies": {
+    "@babel/plugin-transform-regenerator": "^7.0.0",
+    "@babel/polyfill": "^7.2.5",
     "@types/mocha": "^5.2.5",
     "firebase-admin": "7.0.0",
     "mocha": "^5.2.0",
