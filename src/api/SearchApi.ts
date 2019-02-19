@@ -1,29 +1,34 @@
 
-import { SomeResult, makeError, makeSuccess } from "../utils/AppProviderTypes";
+import { SomeResult, makeError, makeSuccess, ResultType } from "../utils/AppProviderTypes";
 // import DictType from "../utils/DictType";
 // import { User, DefaultUser } from "../model/User";
 // import UserStatus from "../enums/UserStatus";
 // import UserType from "../enums/UserType";
 import { leftPad, rightPad }  from '../utils/StringUtils';
 import * as admin from "firebase-admin";
-import { CollectionReference } from "@google-cloud/firestore";
+import { CollectionReference, DocumentSnapshot, QuerySnapshot, QueryDocumentSnapshot } from "@google-cloud/firestore";
 type Firestore = admin.firestore.Firestore;
 
 
 export type SearchPageParams = {
-
+  lastVisible?: DocumentSnapshot,
+  limit: number,
 }
 
-export type SearchResult = PartialResourceResult;
+export type SearchResult<T> = {
+  results: T,
+  lastVisible: DocumentSnapshot,
+};
+
 export type PartialResourceResult = {
   id: string,
+  shortId: string,
 }
-
 
 
 export class SearchApi { 
-  firestore: Firestore;
-  orgId: string;
+  private firestore: Firestore;
+  private orgId: string;
 
 
   constructor(firestore: Firestore, orgId: string) {
@@ -41,13 +46,59 @@ export class SearchApi {
    * @param params: SearchPageParams - params for pagination and limiting etc.
    * @returns Promise<SomeResult<SearchResult>> - PartialResourceResult
    */
-  public async searchByShortId(shortId: string, params: SearchPageParams): Promise<SomeResult<Array<SearchResult>>> {
+  public async searchByShortId(shortId: string, params: SearchPageParams): Promise<SomeResult<SearchResult<Array<PartialResourceResult>>>> {
 
-    //TODO: figure out what a partial resource result looks like.
+    const searchRangeResult = SearchApi.rangeFromShortIdString(shortId);
+    if (searchRangeResult.type === ResultType.ERROR) {
+      return Promise.resolve(searchRangeResult);
+    }
+    const [lowerRange, upperRange] = searchRangeResult.result;
+    //Build base query
+    let query = SearchApi.shortIdCol(this.firestore, this.orgId)
+      .where('id', '>=', lowerRange)
+      .where('id', '<', upperRange)
+      .orderBy('id');
 
+    if (params.lastVisible) {
+      query = query.startAfter(params.lastVisible);
+    }
 
+    //Max limit is 100
+    let limit = params.limit;
+    if (limit > 100) {
+      limit = 100;
+    }
+    query = query.limit(limit);
 
-    return Promise.resolve(makeError<Array<SearchResult>>("Oh no!"));
+    //Run the query
+    let lastVisible: QueryDocumentSnapshot;
+    return await query.get()
+    .then((sn: QuerySnapshot) => {
+      const queryResults: PartialResourceResult[] = [];
+      lastVisible = sn.docs[sn.docs.length - 1];
+
+      sn.forEach(doc => {
+        const data = doc.data();
+        if (data._id) {
+          return;
+        }
+        const result: PartialResourceResult = {
+          id: data.longId,
+          shortId: data.id
+        };
+        queryResults.push(result);
+      });
+
+      return queryResults;
+    })
+    .then(results => {
+      const searchResult: SearchResult<Array<PartialResourceResult>> = {
+        lastVisible,
+        results,
+      };
+      return makeSuccess<SearchResult<Array<PartialResourceResult>>>(searchResult);
+    })
+    .catch((err: Error) => makeError<SearchResult<Array<PartialResourceResult>>>(err.message));
   }
 
 
@@ -55,8 +106,8 @@ export class SearchApi {
   // Helpers
   // ------------------------------------
 
-  public shortIdCol(orgId: string): CollectionReference {
-    return this.firestore.collection('org').doc(orgId).collection('shortId');
+  public static shortIdCol(firestore: Firestore, orgId: string): CollectionReference {
+    return firestore.collection('org').doc(orgId).collection('shortId');
   }
 
 
@@ -129,6 +180,4 @@ export class SearchApi {
 
     return makeSuccess<[string, string]>([lowerRange, upperRange]);
   }
-
-
 }
