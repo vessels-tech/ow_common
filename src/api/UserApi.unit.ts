@@ -11,12 +11,6 @@ import UserType from '../enums/UserType';
 import { admin } from '../test/TestFirebase';
 type Firestore = admin.firestore.Firestore;
 
-
-//TODO: tidy this up
-// if (isUndefined(realFirestore)) {
-//   throw new Error("firestore is undefined");
-// }
-
 const { 
   orgId,
 } = require('../test/testConfig.json');
@@ -28,13 +22,8 @@ const defaultResource: Resource = {
   timeseries: {},
 }
 
-// let firestore: Firestore = realFirestore;
-// if (shouldUseMockFirestore) {
-//   firestore = mockFirestore
-// }
 
-
-describe.only('User Api', function() {
+describe('User Api', function() {
 
   describe('favourites', async function() {
     const firestore: Firestore = new MockFirestore({}).firestore();
