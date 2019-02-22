@@ -23,9 +23,13 @@ type-check:
 build-watch:
 	yarn run type-check:watch
 
-unit-test:
+test-unit:
 	@make type-check
 	yarn run unit
+
+test-service:
+	@make type-check
+	yarn run service
 
 
 publish:

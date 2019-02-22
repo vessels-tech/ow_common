@@ -10,6 +10,8 @@ import { CollectionReference, DocumentSnapshot, QuerySnapshot, QueryDocumentSnap
 import { safeLower } from "../utils/Utils";
 import DictType from "../utils/DictType";
 import { Maybe } from "../utils/Maybe";
+import request from 'request-promise-native';
+
 type Firestore = admin.firestore.Firestore;
 
 
@@ -29,6 +31,13 @@ export type PartialResourceResult = {
   groups: Maybe<DictType<string>>,
 }
 
+export type PlaceResult = {
+  name: string,
+  coords: { latitude: number, longitude: number},
+  boundingBox: number[],
+
+}
+
 
 export class SearchApi { 
   private firestore: Firestore;
@@ -39,6 +48,64 @@ export class SearchApi {
     this.firestore = firestore;
     this.orgId = orgId;
   }
+
+
+  /**
+   * searchForPlaceName
+   *
+   * Lookup a place based on a place name. Uses the free nominatim api.
+   * In the future, we could extend this by adding our own places, such as villages
+   * 
+   * eg: https://nominatim.openstreetmap.org/search/adelaide?format=json
+   *
+   * @param baseUrl: string
+   * @param placeName: string - the place we are searching for
+   * @param searchParams: SearchPageParams - params for pagination and limiting etc. Default limit is 20
+   */
+  public async searchForPlaceName(baseUrl: string, placeName: string, searchParams: SearchPageParams):
+  Promise<SomeResult<SearchResult<Array<PlaceResult>>>> {
+
+    const limit = safeLower(searchParams.limit, 20);
+
+    // https://nominatim.openstreetmap.org/search/adelaide?format=json
+    //TODO: proper param parsing etc.
+    const uri = `${baseUrl}/${placeName}?format=json&email=admin@vesselstech.com&limit=${limit}`;
+    const options = {
+      method: "GET",
+      uri,
+      json: true,
+    };
+
+    return request(options)
+    .then((response: any) => {
+
+      /*
+        example response: {
+          place_id: '6878179',
+          licence: 'Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright',
+          osm_type: 'node',
+          osm_id: '703221878',
+          boundingbox: [ '3.9126024', '3.9326024', '-75.1533441', '-75.1333441' ],
+          lat: '3.9226024',
+          lon: '-75.1433441',
+          display_name: 'Adelaide, Ortega, Tolima, Colombia',
+        }
+      */
+
+      const places: PlaceResult[] = response.map((r: any) => ({
+        name: r.display_name,
+        coords: { latitude: parseFloat(r.lat), longitude: parseFloat(r.lon) },
+        boundingBox: r.boundingbox.map((point: string) => parseFloat(point) ),
+      }))
+      .filter((p: PlaceResult) => p.name !== null);
+
+      return makeSuccess<SearchResult<Array<PlaceResult>>>({
+        params: searchParams,
+        results: places,
+      });
+    })
+    .catch((err: Error) => makeError<SearchResult<Array<PlaceResult>>>(err.message));
+   }
 
   /**
    * searchForResourceInGroup
@@ -104,7 +171,6 @@ export class SearchApi {
 
 
 
-
   /**
    * searchByShortId
    * 
@@ -144,7 +210,7 @@ export class SearchApi {
     //Run the query
     let lastVisible: QueryDocumentSnapshot;
     return await query.get()
-    .then((sn: QuerySnapshot) => {
+    .then((sn: QuerySnapshot) => {  
       const queryResults: PartialResourceResult[] = [];
       lastVisible = sn.docs[sn.docs.length - 1];
 
