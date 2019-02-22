@@ -7,6 +7,9 @@ import { SomeResult, makeError, makeSuccess, ResultType } from "../utils/AppProv
 import { leftPad, rightPad }  from '../utils/StringUtils';
 import * as admin from "firebase-admin";
 import { CollectionReference, DocumentSnapshot, QuerySnapshot, QueryDocumentSnapshot } from "@google-cloud/firestore";
+import { safeLower } from "../utils/Utils";
+import DictType from "../utils/DictType";
+import { Maybe } from "../utils/Maybe";
 type Firestore = admin.firestore.Firestore;
 
 
@@ -22,7 +25,8 @@ export type SearchResult<T> = {
 
 export type PartialResourceResult = {
   id: string,
-  shortId: string,
+  shortId: Maybe<string>,
+  groups: Maybe<DictType<string>>,
 }
 
 
@@ -36,19 +40,84 @@ export class SearchApi {
     this.orgId = orgId;
   }
 
+  /**
+   * searchForResourceInGroup
+   * 
+   * Search for resource given based on group membership. Sorts using where filters on
+   * the field, taking advantage of lexicographic sorting. We need a better approach, 
+   * but firebase doesn't allow it atm.
+   * 
+   * @param groupQuery: string
+   * @param groupToSearch: string - the group we are searching for
+   * @param searchParams: SearchPageParams - params for pagination and limiting etc.
+   */
+  public async searchForResourceInGroup(groupQuery: string, groupToSearch: string, searchParams: SearchPageParams):
+  Promise<SomeResult<SearchResult<Array<PartialResourceResult>>>> {
+
+    //Build base query
+    //For some reason has to be any
+    let query: any = SearchApi.resourceCol(this.firestore, this.orgId)
+    .where(`groups.${groupToSearch}`, '>=', groupQuery)
+    .where(`groups.${groupToSearch}`, '<=', `${groupQuery}z`) //append a z to take advantage of string sort
+    .orderBy('id')
+
+    if (searchParams.lastVisible) {
+      query = query.startAfter(searchParams.lastVisible);
+    }
+    query = query.limit(safeLower(searchParams.limit, 100));
+
+    //Run the query
+    let lastVisible: QueryDocumentSnapshot;
+    return await query.get()
+    .then((sn: QuerySnapshot) => {
+      const queryResults: PartialResourceResult[] = [];
+      lastVisible = sn.docs[sn.docs.length - 1];
+
+      sn.forEach(doc => {
+        const data = doc.data();
+        if (data._id) {
+          return;
+        }
+        const result: PartialResourceResult = {
+          id: data.id,
+          shortId: undefined,
+          groups: data.groups,
+        };
+        queryResults.push(result);
+      });
+
+      return queryResults;
+    })
+    .then((results: any) => {
+      const searchResult: SearchResult<Array<PartialResourceResult>> = {
+        params: {
+          ...searchParams,
+          lastVisible,
+        },
+        results,
+      };
+      return makeSuccess<SearchResult<Array<PartialResourceResult>>>(searchResult);
+    })
+    .catch((err: Error) => makeError<SearchResult<Array<PartialResourceResult>>>(err.message));
+  }
+
+
+
+
 
   /**
    * searchByShortId
    * 
-   * Search for a resource given a 
+   * Search for a resource given a shortId or shortId fragment
    * 
-   * @param shortId: string - a 6 digit or 9 digit shortId
-   * @param params: SearchPageParams - params for pagination and limiting etc.
+   * @param shortIdQuery: string - a 6 digit or 9 digit shortId, or shortId fragment
+   * @param searchParams: SearchPageParams - params for pagination and limiting etc.
    * @returns Promise<SomeResult<SearchResult>> - PartialResourceResult
    */
-  public async searchByShortId(shortId: string, searchParams: SearchPageParams): Promise<SomeResult<SearchResult<Array<PartialResourceResult>>>> {
+  public async searchByShortId(shortIdQuery: string, searchParams: SearchPageParams): 
+  Promise<SomeResult<SearchResult<Array<PartialResourceResult>>>> {
 
-    const searchRangeResult = SearchApi.rangeFromShortIdString(shortId);
+    const searchRangeResult = SearchApi.rangeFromShortIdString(shortIdQuery);
     if (searchRangeResult.type === ResultType.ERROR) {
       return Promise.resolve(searchRangeResult);
     }
@@ -71,11 +140,7 @@ export class SearchApi {
     }
 
     //Max limit is 100
-    let limit = searchParams.limit;
-    if (limit > 100) {
-      limit = 100;
-    }
-    query = query.limit(limit);
+    query = query.limit(safeLower(searchParams.limit, 100));
 
     //Run the query
     let lastVisible: QueryDocumentSnapshot;
@@ -91,7 +156,8 @@ export class SearchApi {
         }
         const result: PartialResourceResult = {
           id: data.longId,
-          shortId: data.shortId
+          shortId: data.shortId,
+          groups: undefined,
         };
         queryResults.push(result);
       });
@@ -118,6 +184,10 @@ export class SearchApi {
 
   public static shortIdCol(firestore: Firestore, orgId: string): CollectionReference {
     return firestore.collection('org').doc(orgId).collection('shortId');
+  }
+
+  public static resourceCol(firestore: Firestore, orgId: string): CollectionReference {
+    return firestore.collection('org').doc(orgId).collection('resource');
   }
 
 

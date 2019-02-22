@@ -1,4 +1,5 @@
 import ResourceStationType from "../enums/ResourceStationType";
+import DictType from "../utils/DictType";
 
 export enum ResourceType {
   Any = 'Any',
@@ -23,6 +24,7 @@ type MyWellResourceProps = {
   resourceType: ResourceStationType,
   lastValue: number,
   lastReadingDatetime: Date,
+  groups: DictType<string>,
 }
 
 type GGMNResourceProps = {
@@ -56,3 +58,24 @@ export type BasePendingResource = {
 
 export type PendingMyWellResource = BasePendingResource & MyWellResourceProps
 export type PendingGGMNResource = BasePendingResource & GGMNResourceProps
+
+
+
+/**
+ * Default Types
+ */
+export const DefaultMyWellResource: MyWellResource = {
+  id: "00001",
+  coords: { latitude: 10, longitude: 10 },
+  timeseries: {}, //TODO: fix
+  type: ResourceType.MyWell,
+  legacyId: "12345",
+  owner: { name: "Lewis ji" },
+  resourceType: ResourceStationType.well,
+  lastValue: 0,
+  lastReadingDatetime: new Date(),
+  groups: {
+    pincode: "313603",
+    country: "IN"
+  }
+}
