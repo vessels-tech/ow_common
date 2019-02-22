@@ -1,5 +1,5 @@
 import * as admin from "firebase-admin";
-import { Maybe, isUndefined } from "../utils/Maybe";
+// import { Maybe, isUndefined } from "../utils/Maybe";
 type Firestore = admin.firestore.Firestore;
 
 // const admin = require('firebase-admin');
@@ -8,7 +8,7 @@ type Firestore = admin.firestore.Firestore;
 /* Not in git. Download from FB console*/
 const serviceAccount = require('./.serviceAccountKey.json');
 
-let firestore: Maybe<Firestore>
+let firestore: Firestore;
 
 if (admin.apps.length === 0) {
   admin.initializeApp({
@@ -17,15 +17,15 @@ if (admin.apps.length === 0) {
     // storageBucket,
   });
   firestore = admin.firestore();
-  const settings = { timestampsInSnapshots: true };
+  const settings = {};
   console.log("TestFirebase calling firestore.settings");
   firestore.settings(settings);
 }
 
 const auth = admin.auth();
-if (isUndefined(firestore)) {
-  firestore = admin.firestore();
-}
+// if (isUndefined(firestore)) {
+//   firestore = admin.firestore();
+// }
 
 // const myExports: {
 //   admin: any

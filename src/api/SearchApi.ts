@@ -17,7 +17,7 @@ export type SearchPageParams = {
 
 export type SearchResult<T> = {
   results: T,
-  lastVisible: DocumentSnapshot,
+  params: SearchPageParams,
 };
 
 export type PartialResourceResult = {
@@ -46,25 +46,32 @@ export class SearchApi {
    * @param params: SearchPageParams - params for pagination and limiting etc.
    * @returns Promise<SomeResult<SearchResult>> - PartialResourceResult
    */
-  public async searchByShortId(shortId: string, params: SearchPageParams): Promise<SomeResult<SearchResult<Array<PartialResourceResult>>>> {
+  public async searchByShortId(shortId: string, searchParams: SearchPageParams): Promise<SomeResult<SearchResult<Array<PartialResourceResult>>>> {
 
     const searchRangeResult = SearchApi.rangeFromShortIdString(shortId);
     if (searchRangeResult.type === ResultType.ERROR) {
       return Promise.resolve(searchRangeResult);
     }
     const [lowerRange, upperRange] = searchRangeResult.result;
-    //Build base query
-    let query = SearchApi.shortIdCol(this.firestore, this.orgId)
-      .where('id', '>=', lowerRange)
-      .where('id', '<', upperRange)
-      .orderBy('id');
 
-    if (params.lastVisible) {
-      query = query.startAfter(params.lastVisible);
+    //Build base query
+    //For some reason has to be any
+    let query: any = SearchApi.shortIdCol(this.firestore, this.orgId);
+    
+    if (lowerRange !== upperRange) {
+      query = query.where('id', '>=', lowerRange).where('id', '<', upperRange);
+    } else {
+      query = query.where('id', '==', lowerRange);
+    }
+
+    query = query.orderBy('id');
+
+    if (searchParams.lastVisible) {
+      query = query.startAfter(searchParams.lastVisible);
     }
 
     //Max limit is 100
-    let limit = params.limit;
+    let limit = searchParams.limit;
     if (limit > 100) {
       limit = 100;
     }
@@ -84,16 +91,19 @@ export class SearchApi {
         }
         const result: PartialResourceResult = {
           id: data.longId,
-          shortId: data.id
+          shortId: data.shortId
         };
         queryResults.push(result);
       });
 
       return queryResults;
     })
-    .then(results => {
+    .then((results: any) => {
       const searchResult: SearchResult<Array<PartialResourceResult>> = {
-        lastVisible,
+        params: {
+          ...searchParams,
+          lastVisible,
+        },
         results,
       };
       return makeSuccess<SearchResult<Array<PartialResourceResult>>>(searchResult);

@@ -22,7 +22,6 @@ const defaultResource: Resource = {
   timeseries: {},
 }
 
-
 describe('User Api', function() {
 
   describe('favourites', async function() {
