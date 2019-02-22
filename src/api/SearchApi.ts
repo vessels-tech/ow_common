@@ -134,7 +134,6 @@ export class SearchApi {
     }
 
     query = query.orderBy('id');
-
     if (searchParams.lastVisible) {
       query = query.startAfter(searchParams.lastVisible);
     }
