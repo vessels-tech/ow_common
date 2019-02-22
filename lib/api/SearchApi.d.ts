@@ -8,9 +8,14 @@ export declare type SearchPageParams = {
     lastVisible?: DocumentSnapshot;
     limit: number;
 };
+export declare enum SearchResultType {
+    PartialResourceResult = "PartialResourceResult",
+    PlaceResult = "PlaceResult"
+}
 export declare type SearchResult<T> = {
     results: T;
     params: SearchPageParams;
+    type: SearchResultType;
 };
 export declare type PartialResourceResult = {
     id: string;
@@ -41,7 +46,7 @@ export declare class SearchApi {
      * @param placeName: string - the place we are searching for
      * @param searchParams: SearchPageParams - params for pagination and limiting etc. Default limit is 20
      */
-    searchForPlaceName(baseUrl: string, placeName: string, searchParams: SearchPageParams): Promise<SomeResult<SearchResult<Array<PlaceResult>>>>;
+    searchForPlaceName(baseUrl: string, placeName: string, searchParams: SearchPageParams, requestApi: any): Promise<SomeResult<SearchResult<Array<PlaceResult>>>>;
     /**
      * searchForResourceInGroup
      *

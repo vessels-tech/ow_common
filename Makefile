@@ -8,7 +8,7 @@ dir = $(shell pwd)
 NPM_VERSION_NUMBER := $(shell node ./tools/getVersionNumber.js)
 
 
-all: build publish
+all: build publish update
 
 install:
 	yarn
@@ -39,6 +39,10 @@ publish:
 	git tag $(NPM_VERSION_NUMBER)
 	git push origin $(NPM_VERSION_NUMBER)
 
+
+update:
+	cd ${dir}/../ow_client && yarn add ow_common
+	cd ${dir}/../ow_firebase && yarn add ow_common
 
 
 .PHONY: build

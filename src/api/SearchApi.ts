@@ -1,16 +1,10 @@
-
 import { SomeResult, makeError, makeSuccess, ResultType } from "../utils/AppProviderTypes";
-// import DictType from "../utils/DictType";
-// import { User, DefaultUser } from "../model/User";
-// import UserStatus from "../enums/UserStatus";
-// import UserType from "../enums/UserType";
 import { leftPad, rightPad }  from '../utils/StringUtils';
 import * as admin from "firebase-admin";
 import { CollectionReference, DocumentSnapshot, QuerySnapshot, QueryDocumentSnapshot } from "@google-cloud/firestore";
 import { safeLower } from "../utils/Utils";
 import DictType from "../utils/DictType";
 import { Maybe } from "../utils/Maybe";
-// import request from 'request-promise-native';
 
 type Firestore = admin.firestore.Firestore;
 
@@ -20,9 +14,15 @@ export type SearchPageParams = {
   limit: number,
 }
 
+export enum SearchResultType {
+  PartialResourceResult = "PartialResourceResult",
+  PlaceResult = "PlaceResult",
+}
+
 export type SearchResult<T> = {
   results: T,
   params: SearchPageParams,
+  type: SearchResultType
 };
 
 export type PartialResourceResult = {
@@ -102,6 +102,7 @@ export class SearchApi {
       return makeSuccess<SearchResult<Array<PlaceResult>>>({
         params: searchParams,
         results: places,
+        type: SearchResultType.PlaceResult,
       });
     })
     .catch((err: Error) => makeError<SearchResult<Array<PlaceResult>>>(err.message));
@@ -162,14 +163,12 @@ export class SearchApi {
           lastVisible,
         },
         results,
+        type: SearchResultType.PartialResourceResult,
       };
       return makeSuccess<SearchResult<Array<PartialResourceResult>>>(searchResult);
     })
     .catch((err: Error) => makeError<SearchResult<Array<PartialResourceResult>>>(err.message));
   }
-
-
-
 
   /**
    * searchByShortId
@@ -236,6 +235,7 @@ export class SearchApi {
           lastVisible,
         },
         results,
+        type: SearchResultType.PartialResourceResult,
       };
       return makeSuccess<SearchResult<Array<PartialResourceResult>>>(searchResult);
     })
