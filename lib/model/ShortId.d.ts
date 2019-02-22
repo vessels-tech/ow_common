@@ -1,5 +1,10 @@
 export declare type ShortId = {
-    shortId: string;
-    longId: string;
+    createdAt: Date;
+    id: string;
     lastUsed: Date;
+    longId: string;
+    orgId: string;
+    shortId: string;
+    updatedAt: Date;
 };
+export declare const DefaultShortId: ShortId;

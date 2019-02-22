@@ -1,7 +1,4 @@
 import "@babel/polyfill";
 
-import {
-  UserApi,
-} from './UserApi';
-
-export { UserApi };
+export * from './UserApi';
+export * from './SearchApi';

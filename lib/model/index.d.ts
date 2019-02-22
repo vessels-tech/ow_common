@@ -1,3 +1,4 @@
+import "@babel/polyfill";
 export * from './ExternalIds';
 export * from './Reading';
 export * from './Resource';

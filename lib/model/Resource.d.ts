@@ -1,4 +1,5 @@
 import ResourceStationType from "../enums/ResourceStationType";
+import DictType from "../utils/DictType";
 export declare enum ResourceType {
     Any = "Any",
     MyWell = "MyWell",
@@ -23,6 +24,7 @@ declare type MyWellResourceProps = {
     resourceType: ResourceStationType;
     lastValue: number;
     lastReadingDatetime: Date;
+    groups: DictType<string>;
 };
 declare type GGMNResourceProps = {
     type: ResourceType.GGMN;
@@ -51,4 +53,8 @@ export declare type BasePendingResource = {
 };
 export declare type PendingMyWellResource = BasePendingResource & MyWellResourceProps;
 export declare type PendingGGMNResource = BasePendingResource & GGMNResourceProps;
+/**
+ * Default Types
+ */
+export declare const DefaultMyWellResource: MyWellResource;
 export {};

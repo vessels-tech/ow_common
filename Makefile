@@ -8,13 +8,13 @@ dir = $(shell pwd)
 NPM_VERSION_NUMBER := $(shell node ./tools/getVersionNumber.js)
 
 
-all: build
+all: build publish
 
 install:
 	yarn
 
 build:
-	@make unit-test
+	@make test-unit
 	yarn run build
 
 type-check:

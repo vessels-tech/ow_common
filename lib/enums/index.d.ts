@@ -1,3 +1,4 @@
+import "@babel/polyfill";
 import Docnames from './DocNames';
 import ResourceStationType from './ResourceStationType';
 import UserStatus from './UserStatus';

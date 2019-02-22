@@ -10,7 +10,7 @@ import { CollectionReference, DocumentSnapshot, QuerySnapshot, QueryDocumentSnap
 import { safeLower } from "../utils/Utils";
 import DictType from "../utils/DictType";
 import { Maybe } from "../utils/Maybe";
-import request from 'request-promise-native';
+// import request from 'request-promise-native';
 
 type Firestore = admin.firestore.Firestore;
 
@@ -62,7 +62,7 @@ export class SearchApi {
    * @param placeName: string - the place we are searching for
    * @param searchParams: SearchPageParams - params for pagination and limiting etc. Default limit is 20
    */
-  public async searchForPlaceName(baseUrl: string, placeName: string, searchParams: SearchPageParams):
+  public async searchForPlaceName(baseUrl: string, placeName: string, searchParams: SearchPageParams, requestApi: any):
   Promise<SomeResult<SearchResult<Array<PlaceResult>>>> {
 
     const limit = safeLower(searchParams.limit, 20);
@@ -75,8 +75,8 @@ export class SearchApi {
       uri,
       json: true,
     };
-
-    return request(options)
+    //TODO: make generic enough for both request and fetch
+    return requestApi(options)
     .then((response: any) => {
 
       /*

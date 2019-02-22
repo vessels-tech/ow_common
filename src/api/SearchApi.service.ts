@@ -5,6 +5,7 @@ import MockFirestore from 'mock-cloud-firestore';
 import { SearchApi, SearchPageParams } from './SearchApi';
 import { unsafeUnwrap } from '../utils/AppProviderTypes';
 import { firestore } from '../test/TestFirebase';
+import request from 'request-promise-native';
 
 const {
   orgId,
@@ -30,7 +31,7 @@ describe('Search Api', function () {
       const searchParams: SearchPageParams = {limit: 10};
 
       //Act
-      const result = unsafeUnwrap(await searchApi.searchForPlaceName(baseUrl, placeName, searchParams));
+      const result = unsafeUnwrap(await searchApi.searchForPlaceName(baseUrl, placeName, searchParams, request));
 
       //Assert
       //This is a little naive, but it's ok for now.
