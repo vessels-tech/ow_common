@@ -3,7 +3,7 @@ import { leftPad, rightPad }  from '../utils/StringUtils';
 import * as admin from "firebase-admin";
 import { CollectionReference, DocumentSnapshot, QuerySnapshot, QueryDocumentSnapshot } from "@google-cloud/firestore";
 import { safeLower } from "../utils/Utils";
-import DictType from "../utils/DictType";
+import { DictType } from "../utils/DictType";
 import { Maybe } from "../utils/Maybe";
 
 type Firestore = admin.firestore.Firestore;
@@ -24,6 +24,7 @@ export type SearchResult<T> = {
   params: SearchPageParams,
   type: SearchResultType
 };
+
 
 export type PartialResourceResult = {
   id: string,

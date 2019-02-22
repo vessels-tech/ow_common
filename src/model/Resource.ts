@@ -1,5 +1,5 @@
 import ResourceStationType from "../enums/ResourceStationType";
-import DictType from "../utils/DictType";
+import { DictType } from "../utils/DictType";
 
 export enum ResourceType {
   Any = 'Any',

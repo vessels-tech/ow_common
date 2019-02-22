@@ -5,8 +5,6 @@ import MockFirestore from 'mock-cloud-firestore';
 import { safeLower } from './Utils';
 
 
-
-
 describe('Search Api', function () {
   this.timeout(5000);
 
