@@ -128,7 +128,8 @@ export class SearchApi {
     let query: any = SearchApi.resourceCol(this.firestore, this.orgId)
     .where(`groups.${groupToSearch}`, '>=', groupQuery)
     .where(`groups.${groupToSearch}`, '<=', `${groupQuery}z`) //append a z to take advantage of string sort
-    .orderBy('id')
+    //The nodejs api allows us to order by Id, but RN Firebase doesn't
+    .orderBy(`groups.${groupToSearch}`)
 
     if (searchParams.lastVisible) {
       query = query.startAfter(searchParams.lastVisible);
@@ -197,7 +198,8 @@ export class SearchApi {
     if (lowerRange !== upperRange) {
       query = query.where('id', '>=', lowerRange).where('id', '<', upperRange);
     } else {
-      query = query.where('id', '==', lowerRange);
+      //Ideally we could do an '=', but RNF doesn't like that
+      query = query.where('id', '>=', lowerRange).where('id', '<=', upperRange);
     }
 
     query = query.orderBy('id');
@@ -279,7 +281,8 @@ export class SearchApi {
     let upperRange: string = "";
 
     //Strip out all spaces, dashes, etc
-    let base = shortId.replace(new RegExp(/[^\d]+/, 'g'), '');
+    // let base = shortId.replace(new RegExp(/[^\d]+/, 'g'), '');
+    let base = shortId.replace(/[^\d]+/ig, '');
 
     //Make sure it's within the range
     if (base.length === 0 || base.length > 9) {
