@@ -1,7 +1,7 @@
 import { Resource, PendingResource } from "./Resource";
 import { PendingReading } from "./Reading";
 import { TranslationEnum } from "ow_translations";
-import DictType from "../utils/DictType";
+import { DictType } from "../utils/DictType";
 import UserStatus from "../enums/UserStatus";
 import UserType from "../enums/UserType";
 export declare type User = {

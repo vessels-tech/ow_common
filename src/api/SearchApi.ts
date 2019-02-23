@@ -25,20 +25,19 @@ export type SearchResult<T> = {
   type: SearchResultType
 };
 
-
 export type PartialResourceResult = {
+  type: SearchResultType.PartialResourceResult,
   id: string,
   shortId: Maybe<string>,
   groups: Maybe<DictType<string>>,
 }
 
 export type PlaceResult = {
+  type: SearchResultType.PlaceResult,
   name: string,
   coords: { latitude: number, longitude: number},
   boundingBox: number[],
-
 }
-
 
 export class SearchApi { 
   private firestore: Firestore;
@@ -94,6 +93,7 @@ export class SearchApi {
       */
 
       const places: PlaceResult[] = response.map((r: any) => ({
+        type: SearchResultType.PlaceResult,
         name: r.display_name,
         coords: { latitude: parseFloat(r.lat), longitude: parseFloat(r.lon) },
         boundingBox: r.boundingbox.map((point: string) => parseFloat(point) ),
@@ -148,6 +148,7 @@ export class SearchApi {
           return;
         }
         const result: PartialResourceResult = {
+          type: SearchResultType.PartialResourceResult,
           id: data.id,
           shortId: undefined,
           groups: data.groups,
@@ -220,6 +221,7 @@ export class SearchApi {
           return;
         }
         const result: PartialResourceResult = {
+          type: SearchResultType.PartialResourceResult,
           id: data.longId,
           shortId: data.shortId,
           groups: undefined,

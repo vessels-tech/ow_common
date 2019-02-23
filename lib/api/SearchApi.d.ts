@@ -1,7 +1,7 @@
 import { SomeResult } from "../utils/AppProviderTypes";
 import * as admin from "firebase-admin";
 import { CollectionReference, DocumentSnapshot } from "@google-cloud/firestore";
-import DictType from "../utils/DictType";
+import { DictType } from "../utils/DictType";
 import { Maybe } from "../utils/Maybe";
 declare type Firestore = admin.firestore.Firestore;
 export declare type SearchPageParams = {
@@ -18,11 +18,13 @@ export declare type SearchResult<T> = {
     type: SearchResultType;
 };
 export declare type PartialResourceResult = {
+    type: SearchResultType.PartialResourceResult;
     id: string;
     shortId: Maybe<string>;
     groups: Maybe<DictType<string>>;
 };
 export declare type PlaceResult = {
+    type: SearchResultType.PlaceResult;
     name: string;
     coords: {
         latitude: number;

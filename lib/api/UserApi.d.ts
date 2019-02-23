@@ -1,6 +1,6 @@
 import { Resource } from "../model/Resource";
 import { SomeResult } from "../utils/AppProviderTypes";
-import DictType from "../utils/DictType";
+import { DictType } from "../utils/DictType";
 import { User } from "../model/User";
 import UserStatus from "../enums/UserStatus";
 import UserType from "../enums/UserType";
