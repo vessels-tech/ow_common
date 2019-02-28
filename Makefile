@@ -42,7 +42,7 @@ publish:
 
 update:
 	cd ${dir}/../ow_client && yarn add ow_common
-	cd ${dir}/../ow_firebase && yarn add ow_common
+	cd ${dir}/../ow_firebase/functions && yarn add ow_common
 
 
 .PHONY: build

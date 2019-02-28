@@ -34,7 +34,7 @@ export class ResourceApi {
     });
 
     if (errors.length > 0) {
-      return makeError<Array<Resource>>(`Error getting resources: ${errors}`);
+      return makeError<Array<Resource>>(`Error getting resources: ${errors.reduce((acc, curr) => `${acc}, ${curr}`, '')}`);
     }
 
     return makeSuccess<Array<Resource>>(resources);
