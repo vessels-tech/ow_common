@@ -115,9 +115,7 @@ describe('Search Api', function () {
       await SearchApi.shortIdCol(firestore, orgId).doc("000100003").set({ ...DefaultShortId, id: '000100003', shortId: '000100003'});
       await SearchApi.shortIdCol(firestore, orgId).doc("000100004").set({ ...DefaultShortId, id: '000100004', shortId: '000100004'});
 
-      await SearchApi.shortIdCol(firestore, orgId).get().then((qs) => {
-        console.log(`We have ${qs.docs.length} docs.`);
-      })
+      await SearchApi.shortIdCol(firestore, orgId).get();
     });
 
     it('transforms shortId strings into valid shortId lookup ranges', () => {

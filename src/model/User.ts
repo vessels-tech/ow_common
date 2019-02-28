@@ -9,6 +9,7 @@ import UserType from "../enums/UserType";
 export type User = {
   id: string;
   favouriteResources: DictType<Resource>,
+  newResources: DictType<string>, //A list of new resources the user hasn't seen yet.
   pendingSavedReadings: PendingReading[],
   pendingSavedResources: PendingResource[],
   recentResources: Resource[],
@@ -21,6 +22,7 @@ export type User = {
 export const DefaultUser: User = {
   id: 'no_user_id', 
   favouriteResources: {},
+  newResources: {},
   pendingSavedReadings: [],
   pendingSavedResources: [],
   recentResources: [],

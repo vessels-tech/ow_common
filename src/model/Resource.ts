@@ -64,6 +64,14 @@ export type PendingGGMNResource = BasePendingResource & GGMNResourceProps
 /**
  * Default Types
  */
+export const DefaultResource: Resource = {
+  type: ResourceType.Any,
+  id: "",
+  coords: { latitude: 1, longitude: 1 },
+  timeseries: {}, //TODO: figure out timeseries...
+};
+
+
 export const DefaultMyWellResource: MyWellResource = {
   id: "00001",
   coords: { latitude: 10, longitude: 10 },

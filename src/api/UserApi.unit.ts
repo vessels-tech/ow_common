@@ -178,4 +178,46 @@ describe('User Api', function() {
       await userApi.userRef(orgId, userId).delete();
     });
   });
+
+
+  describe('new resource add/delete', function() {
+    const firestore: Firestore = new MockFirestore({}).firestore();
+    const userApi = new UserApi(firestore, orgId);
+    const userId = 'user_id_1';
+
+    this.beforeEach(async () => {
+      await userApi.userRef(orgId, userId).set(DefaultUser);
+    });
+
+    it('adds new resource ids to the user', async () => {
+      //Arrange
+      const resourceIds = ["00001", "00002", "00003", "00004", "00005"];
+
+      //Act
+      unsafeUnwrap(await userApi.markAsNewResources(userId, resourceIds));
+
+      //Assert
+      const newResources = unsafeUnwrap(await userApi.getNewResources(userId));
+      assert.equal(Object.keys(newResources).length, resourceIds.length);
+    });
+
+    it('delete a resource id from the user', async () => {
+      //Arrange
+      const resourceIds = ["00001", "00002", "00003", "00004", "00005"];
+
+      //Act
+      unsafeUnwrap(await userApi.markAsNewResources(userId, resourceIds));
+      unsafeUnwrap(await userApi.removeNewResource(userId, "00004"));
+
+      //Assert
+      const newResources = unsafeUnwrap(await userApi.getNewResources(userId));
+      assert.equal(Object.keys(newResources).length, resourceIds.length - 1);
+    });
+
+    this.afterEach(async () => {
+      await userApi.userRef(orgId, userId).delete();
+    });
+
+  });
+
 });

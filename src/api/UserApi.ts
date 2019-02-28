@@ -29,6 +29,63 @@ export class UserApi {
     return this.updateFavouriteResources(userId, favourites);
   }
 
+  /**
+   * Add a list of favourite resources to the user's favourites
+   */
+  public async addFavouriteResources(userId: string, resources: Resource[]): Promise<SomeResult<void>> {
+    const favouritesResult = await this.getFavouriteResources(userId);
+    if (favouritesResult.type === ResultType.ERROR) {
+      return favouritesResult;
+    }
+    const favourites = favouritesResult.result;
+    resources.forEach(r => {
+      favourites[r.id] = r;
+    });
+
+    return this.updateFavouriteResources(userId, favourites);
+  }
+
+  /**
+   * Add new resources to the User's object.
+   */
+  public async markAsNewResources(userId: string, resourceIds: string[]): Promise<SomeResult<void>> {
+    const newResourcesResult = await this.getNewResources(userId);
+    if (newResourcesResult.type === ResultType.ERROR) {
+      return newResourcesResult;
+    }
+    const newResources = newResourcesResult.result;
+    resourceIds.forEach(id => newResources[id] = id);
+
+    return this.updateNewResources(userId, newResources);
+  }
+
+  public async removeNewResource(userId: string, resourceId: string): Promise<SomeResult<void>> {
+    const newResourcesResult = await this.getNewResources(userId);
+    if (newResourcesResult.type === ResultType.ERROR) {
+      return newResourcesResult;
+    }
+    const newResources = newResourcesResult.result;
+    delete newResources[resourceId];
+
+    return this.updateNewResources(userId, newResources);
+  }
+
+  public async getNewResources(userId: string): Promise<SomeResult<DictType<string>>> {
+    const userResult = await this.getUser(this.userRef(this.orgId, userId));
+    if (userResult.type === ResultType.ERROR) {
+      return userResult;
+    }
+
+    const user = userResult.result;
+    return makeSuccess(user.newResources);
+  }
+
+  private async updateNewResources(userId: string, newResources: DictType<string>): Promise<SomeResult<void>> {
+    return this.userRef(this.orgId, userId).set({ newResources }, { merge: true })
+      .then(() => makeSuccess(undefined))
+      .catch((err: Error) => makeError(err.message))
+  }
+
   public async removeFavouriteResource(userId: string, resourceId: string): Promise<SomeResult<void>> {
     const favouritesResult = await this.getFavouriteResources(userId);
     if (favouritesResult.type === ResultType.ERROR) {
