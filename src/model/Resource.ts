@@ -87,3 +87,11 @@ export const DefaultMyWellResource: MyWellResource = {
     country: "IN"
   }
 }
+
+export const DefaultPendingResource: PendingResource = {
+  pending: true,
+
+  pendingId: "00001",
+  coords: { latitude: 1, longitude: 1 },
+  timeseries: {},
+}
