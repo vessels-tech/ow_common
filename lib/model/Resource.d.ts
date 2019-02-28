@@ -56,5 +56,6 @@ export declare type PendingGGMNResource = BasePendingResource & GGMNResourceProp
 /**
  * Default Types
  */
+export declare const DefaultResource: Resource;
 export declare const DefaultMyWellResource: MyWellResource;
 export {};

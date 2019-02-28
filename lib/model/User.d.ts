@@ -7,6 +7,7 @@ import UserType from "../enums/UserType";
 export declare type User = {
     id: string;
     favouriteResources: DictType<Resource>;
+    newResources: DictType<string>;
     pendingSavedReadings: PendingReading[];
     pendingSavedResources: PendingResource[];
     recentResources: Resource[];

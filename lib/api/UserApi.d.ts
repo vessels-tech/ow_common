@@ -12,6 +12,17 @@ export declare class UserApi {
     orgId: string;
     constructor(firestore: Firestore, orgId: string);
     addFavouriteResource(userId: string, resource: Resource): Promise<SomeResult<void>>;
+    /**
+     * Add a list of favourite resources to the user's favourites
+     */
+    addFavouriteResources(userId: string, resources: Resource[]): Promise<SomeResult<void>>;
+    /**
+     * Add new resources to the User's object.
+     */
+    markAsNewResources(userId: string, resourceIds: string[]): Promise<SomeResult<void>>;
+    removeNewResource(userId: string, resourceId: string): Promise<SomeResult<void>>;
+    getNewResources(userId: string): Promise<SomeResult<DictType<string>>>;
+    private updateNewResources;
     removeFavouriteResource(userId: string, resourceId: string): Promise<SomeResult<void>>;
     private updateFavouriteResources;
     getFavouriteResources(userId: string): Promise<SomeResult<DictType<Resource>>>;
