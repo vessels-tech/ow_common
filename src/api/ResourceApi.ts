@@ -64,9 +64,4 @@ export class ResourceApi {
     .catch((err: Error) => makeError<Resource>(err.message))
   }
 
-
-
-
-
-
 }

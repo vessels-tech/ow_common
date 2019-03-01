@@ -59,4 +59,11 @@ describe('Resource Api', function () {
     assert.equal(resources.length, resourceIds.length);
   });
 
+  this.afterAll(async () => {
+    await resourceApi.resourceRef("00001").delete();
+    await resourceApi.resourceRef("00002").delete();
+    await resourceApi.resourceRef("00003").delete();
+    await resourceApi.resourceRef("00004").delete();
+    await resourceApi.resourceRef("00005").delete();
+  });
 });

@@ -61,3 +61,17 @@ export type BasePendingReading = {
 export type PendingMyWellReading = BasePendingReading & MyWellReadingProps;
 export type PendingGGMNReading = BasePendingReading & GGMNReadingProps;
 
+
+
+/**
+ * Default Types
+ */
+
+export const DefaultReading: Reading = {
+  type: ReadingType.Any,
+  datetime: "2017-01-01T01:11:01Z",
+  resourceId: "no_resource_id",
+  resourceType: ResourceStationType.well,
+  timeseriesId: "no_timeseries_id",
+  value: 0
+}
