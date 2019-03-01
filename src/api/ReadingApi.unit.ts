@@ -85,7 +85,6 @@ describe('Reading Api', function () {
 
     //Act
     const readings = unsafeUnwrap(await readingApi.getReadingsForResourceId(resourceId, params));
-    console.log(readings.readings);
 
     //Assert
     assert.equal(readings.readings[0].value, 3);
