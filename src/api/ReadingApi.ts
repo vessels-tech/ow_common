@@ -40,6 +40,9 @@ export class ReadingApi {
    * may add the ability to filter by date. Also ignores the lastVisible, as we 
    * can't really implement paginiation across multiple queries very easily atm.
    * 
+   * This also wont respect date ordering from one resource to another, as the individual 
+   * date queries are merged together.
+   * 
    * @param resourceIds 
    * @param params 
    */
@@ -91,7 +94,7 @@ export class ReadingApi {
     .where(`resourceId`, '==', resourceId)
 
     //I think these results will be ordered, since the readingIds are ordered inherently, but here:
-    .orderBy('createdAt');
+    .orderBy('datetime', 'desc');
 
     if (params.lastVisible) {
       query = query.startAfter(params.lastVisible);

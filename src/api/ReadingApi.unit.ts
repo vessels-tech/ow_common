@@ -26,6 +26,9 @@ describe('Reading Api', function () {
     await readingApi.readingCol().doc("reading_004").set({...DefaultReading, resourceId: "00002", timeseriesId: 'default'})
     await readingApi.readingCol().doc("reading_005").set({...DefaultReading, resourceId: "00003", timeseriesId: 'default'})
     await readingApi.readingCol().doc("reading_006").set({...DefaultReading, resourceId: "00003", timeseriesId: 'default'})
+    await readingApi.readingCol().doc("reading_007").set({...DefaultReading, datetime: '2017-01-01T01:11:01Z', value: 1, resourceId: "00004", timeseriesId: 'default'})
+    await readingApi.readingCol().doc("reading_008").set({...DefaultReading, datetime: '2017-01-02T01:11:01Z', value: 2, resourceId: "00004", timeseriesId: 'default'})
+    await readingApi.readingCol().doc("reading_009").set({...DefaultReading, datetime: '2017-01-03T01:11:01Z', value: 3, resourceId: "00004", timeseriesId: 'default'})
   });
 
 
@@ -72,6 +75,22 @@ describe('Reading Api', function () {
     //Assert
     assert.equal(readings.readings.length, 1);
   });
+
+  it('orders the individual query with the newest readings first', async () => {
+    //Arrange
+    const resourceId = "00004";
+    const params = {
+      limit: 100
+    }
+
+    //Act
+    const readings = unsafeUnwrap(await readingApi.getReadingsForResourceId(resourceId, params));
+    console.log(readings.readings);
+
+    //Assert
+    assert.equal(readings.readings[0].value, 3);
+  });
+
 
 
   this.afterAll(async () => {
