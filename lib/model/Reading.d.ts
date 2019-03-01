@@ -49,4 +49,8 @@ export declare type BasePendingReading = {
 };
 export declare type PendingMyWellReading = BasePendingReading & MyWellReadingProps;
 export declare type PendingGGMNReading = BasePendingReading & GGMNReadingProps;
+/**
+ * Default Types
+ */
+export declare const DefaultReading: Reading;
 export {};
