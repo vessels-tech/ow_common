@@ -13,6 +13,12 @@ all: build publish update
 install:
 	yarn
 
+switch-dev:
+	cp ${dir}/src/test/.serviceAccountKey.development.json ${dir}/src/test/.serviceAccountKey.json
+
+switch-prod:
+	cp ${dir}/src/test/.serviceAccountKey.production.json ${dir}/src/test/.serviceAccountKey.json
+
 build:
 	@make test-unit
 	yarn run build

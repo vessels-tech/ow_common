@@ -81,7 +81,7 @@ export class UserApi {
   }
 
   private async updateNewResources(userId: string, newResources: DictType<string>): Promise<SomeResult<void>> {
-    return this.userRef(this.orgId, userId).set({ newResources }, { merge: true })
+    return this.userRef(this.orgId, userId).update({ newResources })
       .then(() => makeSuccess(undefined))
       .catch((err: Error) => makeError(err.message))
   }

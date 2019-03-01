@@ -15,6 +15,7 @@ const {
   orgId,
 } = require('../test/testConfig.json');
 
+
 const defaultResource: Resource = {
   type: ResourceType.Any,
   id: 'resource_1',
@@ -181,7 +182,9 @@ describe('User Api', function() {
 
 
   describe('new resource add/delete', function() {
+    this.timeout(5000);
     const firestore: Firestore = new MockFirestore({}).firestore();
+
     const userApi = new UserApi(firestore, orgId);
     const userId = 'user_id_1';
 
