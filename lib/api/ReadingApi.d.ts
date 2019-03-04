@@ -47,6 +47,20 @@ export declare class ReadingApi {
      * @param params
      */
     getReadingsForResourceId(resourceId: string, params: ReadingPageParams): Promise<SomeResult<ReadingResult>>;
+    /**
+     * bulkSaveReadings
+     *
+     * Save readings in bulk
+     */
+    bulkUploadReadings(readings: Reading[], batchSize: number): Promise<SomeResult<any>>;
     readingCol(): CollectionReference;
+    /**
+     * The Id for a reading is generated as a hash of the
+     * reading's dateTime + ResourceId + timeseriesId.
+     *
+     * For now, we can just encode it as a base64 string
+     */
+    static hashReadingId(resourceId: string, timeseriesId: string, dateTime: Date): string;
+    static commitBatch(batch: FirebaseFirestore.WriteBatch): Promise<SomeResult<Array<FirebaseFirestore.WriteResult>>>;
 }
 export {};

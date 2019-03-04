@@ -99,5 +99,8 @@ describe('Reading Api', function () {
     await readingApi.readingCol().doc("reading_004").delete();
     await readingApi.readingCol().doc("reading_005").delete();
     await readingApi.readingCol().doc("reading_006").delete();
+    await readingApi.readingCol().doc("reading_007").delete();
+    await readingApi.readingCol().doc("reading_008").delete();
+    await readingApi.readingCol().doc("reading_009").delete();
   });
 });

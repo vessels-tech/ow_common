@@ -2,7 +2,8 @@
 import * as admin from "firebase-admin";
 import { DocumentSnapshot, CollectionReference, QueryDocumentSnapshot, QuerySnapshot } from "@google-cloud/firestore";
 import { Reading, DefaultReading } from "../model";
-import { SomeResult, safeLower, makeSuccess, makeError, ErrorResult, ResultType } from "../utils";
+import { SomeResult, safeLower, makeSuccess, makeError, ErrorResult, ResultType, chunkArray } from "../utils";
+import btoa from 'btoa';
 
 type Firestore = admin.firestore.Firestore;
 
@@ -139,8 +140,66 @@ export class ReadingApi {
   }
 
 
+  /**
+   * bulkSaveReadings
+   * 
+   * Save readings in bulk
+   */
+  async bulkUploadReadings(readings: Reading[], batchSize: number): Promise<SomeResult<any>> {
+    const readingBatches = chunkArray(readings, batchSize);
+    let writeResults: any[] = [];
+
+    const batchSaveResult = await readingBatches.reduce(async (acc: Promise<SomeResult<any>>, curr: Reading[], idx) => {
+      const lastResult = await acc;
+      if (lastResult.type === ResultType.ERROR) {
+        return Promise.resolve(lastResult);
+      }
+
+      const batch = this.firestore.batch();
+      curr.forEach(reading => {
+        const id = ReadingApi.hashReadingId(reading.resourceId, reading.timeseriesId, new Date(reading.datetime));
+        const ref = this.readingCol().doc(id);
+        batch.set(ref, {
+          ...DefaultReading,
+          ...reading
+        });
+      });
+
+      return await ReadingApi.commitBatch(batch)
+      .then(result => {
+        if (result.type === ResultType.SUCCESS) {
+          writeResults = writeResults.concat(result.result);
+        }
+        return result;
+      })
+    }, Promise.resolve(makeSuccess<any>(undefined)));
+
+    if (batchSaveResult.type === ResultType.ERROR) {
+      return batchSaveResult;
+    }
+
+    return makeSuccess(writeResults);
+  }
+
   public readingCol(): CollectionReference {
     return this.firestore.collection('org').doc(this.orgId).collection('reading');
   }
 
+
+  /**
+   * The Id for a reading is generated as a hash of the
+   * reading's dateTime + ResourceId + timeseriesId.
+   * 
+   * For now, we can just encode it as a base64 string
+   */
+  public static hashReadingId(resourceId: string, timeseriesId: string, dateTime: Date): string {
+    const input = `${resourceId}_${timeseriesId}_${dateTime.valueOf()}`;
+    return btoa(input);
+  }
+
+  public static commitBatch(batch: FirebaseFirestore.WriteBatch): Promise<SomeResult<Array<FirebaseFirestore.WriteResult>>> {
+    return batch.commit()
+    .then(res => makeSuccess(res))
+    .catch((err: Error) => makeError<Array<FirebaseFirestore.WriteResult>>(err.message));
+  }
 }
