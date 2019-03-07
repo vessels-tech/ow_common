@@ -9,7 +9,7 @@ export declare class ResourceApi {
     constructor(firestore: Firestore, orgId: string);
     getResourceForId(resourceId: string): Promise<SomeResult<Resource>>;
     getResourcesForIds(resourceIds: string[]): Promise<SomeResult<Array<Resource>>>;
-    resourceRef(resourceId: string): DocumentReference;
+    resourceRef(resourceId?: string): DocumentReference;
     getResource(resourceRef: DocumentReference): Promise<SomeResult<Resource>>;
 }
 export {};

@@ -29,7 +29,8 @@ export type PartialResourceResult = {
   type: SearchResultType.PartialResourceResult,
   id: string,
   shortId: Maybe<string>,
-  groups: Maybe<DictType<string>>,
+  groups: DictType<string>,
+  owner: DictType<string>,
 }
 
 export type PlaceResult = {
@@ -153,6 +154,7 @@ export class SearchApi {
           id: data.id,
           shortId: undefined,
           groups: data.groups,
+          owner: data.owner,
         };
         queryResults.push(result);
       });
@@ -226,7 +228,8 @@ export class SearchApi {
           type: SearchResultType.PartialResourceResult,
           id: data.longId,
           shortId: data.shortId,
-          groups: undefined,
+          groups: {},
+          owner: {}
         };
         queryResults.push(result);
       });

@@ -44,7 +44,11 @@ export class ResourceApi {
   // Helpers
   // ------------------------------------
   
-  public resourceRef(resourceId: string): DocumentReference {
+  public resourceRef(resourceId?: string): DocumentReference {
+    if (!resourceId) {
+      return this.firestore.collection('org').doc(this.orgId).collection('resource').doc();
+    }
+
     return this.firestore.collection('org').doc(this.orgId).collection('resource').doc(resourceId);
   }
 
