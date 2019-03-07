@@ -1,5 +1,5 @@
 import { Resource, DefaultMyWellResource } from "../model/Resource";
-import { SomeResult, ResultType, makeSuccess, makeError, resultsHasError, summarizeResults } from "../utils/AppProviderTypes";
+import { SomeResult, ResultType, makeSuccess, makeError, summarizeResults } from "../utils/AppProviderTypes";
 import { DictType } from "../utils/DictType";
 import { User, DefaultUser } from "../model/User";
 import UserStatus from "../enums/UserStatus";
@@ -7,8 +7,8 @@ import UserType from "../enums/UserType";
 import * as admin  from "firebase-admin";
 import { DocumentReference } from "@google-cloud/firestore";
 import ArrayUtils from "../utils/ArrayUtils";
-import { Reading, PendingReading, DefaultReading } from "../model";
-import { safeGetNested, safeGetNestedDefault } from "../utils";
+import { Reading, DefaultReading } from "../model";
+import { safeGetNestedDefault } from "../utils";
 
 type Firestore = admin.firestore.Firestore;
 
@@ -231,10 +231,11 @@ export class UserApi {
     const saveResourcesResult = summarizeResults(await Promise.all(oldResources.map(r => {
 
       //Update the createdByUserId
-      const owner: DictType<string> = safeGetNestedDefault(r, ['owner'], {});
+      //TODO: TD: for some reason we need to clone here for tests to pass... not sure why.
+      const owner: DictType<string> = JSON.parse(JSON.stringify(safeGetNestedDefault(r, ['owner'], {})));
       owner.createdByUserId = newUserId;
 
-      return this.userRef(this.orgId, newUserId).collection('pendingResources').doc(r.id).create({
+      return this.userRef(this.orgId, newUserId).collection('pendingResources').doc(r.id).set({
         ...r,
         owner,
       })

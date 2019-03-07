@@ -4,12 +4,14 @@ import { UserApi } from './UserApi';
 //@ts-ignore
 import MockFirestore from 'mock-cloud-firestore';
 import { DefaultUser, User } from '../model/User';
-import { Resource, ResourceType, DefaultResource, DefaultPendingResource, DefaultMyWellResource } from '../model/Resource';
+import { Resource, ResourceType, DefaultPendingResource, DefaultMyWellResource } from '../model/Resource';
 import { unsafeUnwrap } from '../utils/AppProviderTypes';
 import UserStatus from '../enums/UserStatus';
 import UserType from '../enums/UserType';
 import { admin } from '../test/TestFirebase';
 import { DefaultReading } from '../model';
+import { safeGetNested } from '../utils';
+import { TranslationEnum } from 'ow_translations';
 type Firestore = admin.firestore.Firestore;
 
 const { 
@@ -224,29 +226,51 @@ describe('User Api', function() {
   });
 
   describe('merge users', function() {
-    this.timeout(5000);
+    this.timeout(10000);
     const firestore: Firestore = new MockFirestore({}).firestore();
     const userApi = new UserApi(firestore, orgId);
-
     const oldUserId = "old_user_1234";
     const newUserId = "new_user_1234";
 
     this.beforeEach(async function() {
       //Create 2 users
-      await userApi.userRef(orgId, oldUserId).set(DefaultUser);
-      await userApi.userRef(orgId, newUserId).set(DefaultUser);
+      await userApi.userRef(orgId, oldUserId).set({ 
+        ...DefaultUser, 
+        id: oldUserId, 
+        favouriteResources: {
+          "1234": { ...DefaultMyWellResource },
+          "5678": { ...DefaultMyWellResource },
+        },
+        newResources: {
+          "123": "123",
+          "456": "456",
+        },
+        status: UserStatus.Unapproved,
+        translation: TranslationEnum.en_US, 
+        type: UserType.Admin,
+      });
+      await userApi.userRef(orgId, newUserId).set({
+        ...DefaultUser,
+        id: newUserId, 
+        newResources: {
+          "567": "567",
+          "890": "890",
+        },
+        status: UserStatus.Approved,
+        type: UserType.User,
+      });
 
       const oldUserOwner = { name: "Lewis ji", createdByUserId: oldUserId };
       const newUserOwner = { name: "Lewis ji", createdByUserId: newUserId };
 
       //Create Pending Resources
-      await userApi.userRef(orgId, oldUserId).collection('pendingResources').doc('00001').set({ ...DefaultPendingResource, owner: oldUserOwner, id: "00001", groups: { country: "IN", pincode: "313603" } });
-      await userApi.userRef(orgId, oldUserId).collection('pendingResources').doc('00002').set({ ...DefaultPendingResource, owner: oldUserOwner, id: "00002", groups: { country: "IN", pincode: "313603" } });
-      await userApi.userRef(orgId, oldUserId).collection('pendingResources').doc('00003').set({ ...DefaultPendingResource, id: "00002", groups: { country: "IN", pincode: "313603" } });
+      await userApi.userRef(orgId, oldUserId).collection('pendingResources').doc('00001').set({ ...DefaultPendingResource, owner: {...oldUserOwner}, id: "00001", groups: { country: "IN", pincode: "313603" } });
+      await userApi.userRef(orgId, oldUserId).collection('pendingResources').doc('00002').set({ ...DefaultPendingResource, owner: {...oldUserOwner}, id: "00002", groups: { country: "IN", pincode: "313603" } });
+      await userApi.userRef(orgId, oldUserId).collection('pendingResources').doc('00003').set({ ...DefaultPendingResource, id: "00003", groups: { country: "IN", pincode: "313603" } });
 
-      await userApi.userRef(orgId, newUserId).collection('pendingResources').doc('00004').set({ ...DefaultPendingResource, owner: newUserOwner, id: "00003", groups: { country: "IN", pincode: "313603" } });
-      await userApi.userRef(orgId, newUserId).collection('pendingResources').doc('00005').set({ ...DefaultPendingResource, owner: newUserOwner, id: "00004", groups: { country: "IN", pincode: "313603" } });
-      await userApi.userRef(orgId, newUserId).collection('pendingResources').doc('00006').set({ ...DefaultPendingResource, owner: newUserOwner, id: "00005", groups: { country: "IN", pincode: "313603" } });
+      await userApi.userRef(orgId, newUserId).collection('pendingResources').doc('00004').set({ ...DefaultPendingResource, owner: {...newUserOwner}, id: "00004", groups: { country: "IN", pincode: "313603" } });
+      await userApi.userRef(orgId, newUserId).collection('pendingResources').doc('00005').set({ ...DefaultPendingResource, owner: {...newUserOwner}, id: "00005", groups: { country: "IN", pincode: "313603" } });
+      await userApi.userRef(orgId, newUserId).collection('pendingResources').doc('00006').set({ ...DefaultPendingResource, owner: {...newUserOwner}, id: "00006", groups: { country: "IN", pincode: "313603" } });
 
       //Create pending readings:
       await userApi.userRef(orgId, oldUserId).collection('pendingReadings').doc("reading_001").set({ ...DefaultReading, resourceId: "00001", timeseriesId: 'default' })
@@ -255,23 +279,62 @@ describe('User Api', function() {
 
       await userApi.userRef(orgId, newUserId).collection('pendingReadings').doc("reading_001").set({ ...DefaultReading, resourceId: "00003", datetime: '2017-01-02T01:11:01Z', value: 2, timeseriesId: 'default' })
       await userApi.userRef(orgId, newUserId).collection('pendingReadings').doc("reading_002").set({ ...DefaultReading, resourceId: "00004", datetime: '2017-01-03T01:11:01Z', value: 3, timeseriesId: 'default' })
-
     });
 
     it('merges together the pendingReadings', async() => {
       //Arrange
-
       //Act
-      
-
-
+      unsafeUnwrap(await userApi.mergeUserPendingReadings(oldUserId, newUserId));
+      const newPendingReadings = unsafeUnwrap(await userApi.getPendingReadings(userApi.userRef(orgId, newUserId)));
 
       //Assert
-
+      assert.equal(newPendingReadings.length, 5);
     });
 
-    it('merges together pending resources, and updates the createdByUserId');
-    it('merges together two users');
+    it('merges together pending resources, and updates the createdByUserId', async () => {
+      //Arrange
+      //Act
+      unsafeUnwrap(await userApi.mergeUserPendingResources(oldUserId, newUserId));
+      const newPendingReadings = unsafeUnwrap(await userApi.getPendingResources(userApi.userRef(orgId, newUserId)));
+
+      //Assert
+      assert.equal(newPendingReadings.length, 6);
+      newPendingReadings.forEach(r => {
+        const createdByUserId = safeGetNested(r, ['owner', 'createdByUserId']);
+        assert.strictEqual(createdByUserId, newUserId);
+      });
+    });
+
+
+    it('merges together two users', async () => {
+      //Arrange
+      const expected = {
+        id: newUserId,
+        favouriteResources: {
+          "1234": {...DefaultMyWellResource },
+          "5678": { ...DefaultMyWellResource },
+        },
+        newResources: {
+          "123": "123",
+          "456": "456",
+          "567": "567",
+          "890": "890",
+        },
+        pendingSavedReadings: [],
+        pendingSavedResources: [],
+        recentResources: [],
+        recentSearches: [],
+        status: UserStatus.Approved,
+        translation: TranslationEnum.en_AU,
+        type: UserType.User,
+      };
+
+      //Act
+      unsafeUnwrap(await userApi.mergeUsers(oldUserId, newUserId));
+      const updatedUser = unsafeUnwrap(await userApi.getUser(userApi.userRef(orgId, newUserId)));
+
+      assert.deepStrictEqual(updatedUser, expected)
+    });
 
     this.afterEach(async function () {
       //This will clear nested subcollections.
@@ -281,10 +344,65 @@ describe('User Api', function() {
   });
 
   describe('Merge Users 2', function() {
+    this.timeout(10000);
+    const firestore: Firestore = new MockFirestore({}).firestore();
+    const userApi = new UserApi(firestore, orgId);
+    const oldUserId = "old_user_1234";
+    const newUserId = "new_user_1234";
+
     //TODO: create the users only
+    this.beforeEach(async function() {
+      await userApi.userRef(orgId, oldUserId).set({
+        ...DefaultUser,
+        id: oldUserId,
+        favouriteResources: {
+          "1234": { ...DefaultMyWellResource },
+          "5678": { ...DefaultMyWellResource },
+        },
+        newResources: {
+          "123": "123",
+          "456": "456",
+        },
+        status: UserStatus.Unapproved,
+        translation: TranslationEnum.en_US,
+        type: UserType.Admin,
+      });
+      await userApi.userRef(orgId, newUserId).set({
+        ...DefaultUser,
+        id: newUserId,
+        newResources: {
+          "567": "567",
+          "890": "890",
+        },
+        status: UserStatus.Approved,
+        type: UserType.User,
+      });
+    })
 
-    it('merges together pending resources when none exist');
-    it('merges together the pendingReadings when none exist');
+    it('merges together pending resources when none exist', async () => {
+      //Arrange
+      //Act
+      unsafeUnwrap(await userApi.mergeUserPendingResources(oldUserId, newUserId));
+      const newPendingReadings = unsafeUnwrap(await userApi.getPendingResources(userApi.userRef(orgId, newUserId)));
+
+      //Assert
+      assert.equal(newPendingReadings.length, 0);
+    });
+
+    it('merges together the pendingReadings when none exist', async () => {
+      //Arrange
+      //Act
+      unsafeUnwrap(await userApi.mergeUserPendingReadings(oldUserId, newUserId));
+      const newPendingReadings = unsafeUnwrap(await userApi.getPendingReadings(userApi.userRef(orgId, newUserId)));
+
+      //Assert
+      assert.equal(newPendingReadings.length, 0);
+    });
+
+    this.afterEach(async function () {
+      //This will clear nested subcollections.
+      await userApi.userRef(orgId, oldUserId).delete();
+      await userApi.userRef(orgId, newUserId).delete();
+    });
   });
-
 });
