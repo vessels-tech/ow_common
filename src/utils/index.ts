@@ -1,5 +1,6 @@
 
 export * from './AppProviderTypes';
+export * from './ArrayUtils';
 export * from './DictType';
 export * from './FirestoreDoc';
 export * from './Maybe';

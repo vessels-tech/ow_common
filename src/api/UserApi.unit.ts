@@ -223,4 +223,12 @@ describe('User Api', function() {
 
   });
 
+  describe('merge users', function() {
+
+    it('merges together two users');
+    it('merges together the pendingReadings');
+    it('merges together pending resources, and updates the createdByUserId');
+
+  });
+
 });

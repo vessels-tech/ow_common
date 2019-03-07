@@ -66,3 +66,22 @@ export function resultsHasError(results: Array<SomeResult<any>>): boolean {
     return acc;
   }, false);
 }
+
+/**
+ * Reduces a list of SomeResults to a single result.
+ * Final result must have a type of void.
+ */
+export function summarizeResults(results: Array<SomeResult<any>>): SomeResult<void> {
+  let errorMessage = '';
+  results.forEach(r => {
+    if (r.type === ResultType.ERROR) {
+      errorMessage += `, ${r.message}`;
+    }
+  });
+
+  if (errorMessage !== '') {
+    return makeError<void>(errorMessage)
+  }
+
+  return makeSuccess(undefined);
+}

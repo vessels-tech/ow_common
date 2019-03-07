@@ -21,7 +21,8 @@ export declare type PartialResourceResult = {
     type: SearchResultType.PartialResourceResult;
     id: string;
     shortId: Maybe<string>;
-    groups: Maybe<DictType<string>>;
+    groups: DictType<string>;
+    owner: DictType<string>;
 };
 export declare type PlaceResult = {
     type: SearchResultType.PlaceResult;
