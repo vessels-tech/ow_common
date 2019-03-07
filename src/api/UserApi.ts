@@ -228,7 +228,6 @@ export class UserApi {
     }
 
     const oldResources = oldResourcesResult.result;
-    //we don't care about the doc id here...
     const saveResourcesResult = summarizeResults(await Promise.all(oldResources.map(r => {
 
       //Update the createdByUserId

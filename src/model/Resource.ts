@@ -78,7 +78,7 @@ export const DefaultMyWellResource: MyWellResource = {
   timeseries: {}, //TODO: fix
   type: ResourceType.MyWell,
   legacyId: "12345",
-  owner: { name: "Lewis ji" },
+  owner: { name: "Lewis ji", createdByUserId: 'user_12345' },
   resourceType: ResourceStationType.well,
   lastValue: 0,
   lastReadingDatetime: new Date(),
