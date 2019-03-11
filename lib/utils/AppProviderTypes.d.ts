@@ -25,3 +25,8 @@ export declare function unsafeUnwrap<T>(result: SomeResult<T>): T;
  * Reduces a list of SomeResults and returns if any of them contain an error
  */
 export declare function resultsHasError(results: Array<SomeResult<any>>): boolean;
+/**
+ * Reduces a list of SomeResults to a single result.
+ * Final result must have a type of void.
+ */
+export declare function summarizeResults(results: Array<SomeResult<any>>): SomeResult<void>;

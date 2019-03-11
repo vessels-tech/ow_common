@@ -8,7 +8,7 @@ import * as admin  from "firebase-admin";
 import { DocumentReference } from "@google-cloud/firestore";
 import ArrayUtils from "../utils/ArrayUtils";
 import { Reading, DefaultReading } from "../model";
-import { safeGetNestedDefault } from "../utils";
+import { safeGetNestedDefault, getOrElse } from "../utils";
 
 type Firestore = admin.firestore.Firestore;
 
@@ -257,10 +257,7 @@ export class UserApi {
   public async getUser(userRef: DocumentReference): Promise<SomeResult<User>> {
     return userRef.get()
     .then(sn => {
-      const data = sn.data();
-      if (!data) {
-        return makeError<User>(`No data found for userRef:${userRef}`);
-      }
+      let data = getOrElse(sn.data(), {});
 
       //Set the default user data here.
       return makeSuccess({
@@ -281,7 +278,7 @@ export class UserApi {
           }
           readings.push({
             ...DefaultReading,
-            ...sn.data()
+            ...sn.data(),
           });
         });
         return readings;
@@ -301,7 +298,8 @@ export class UserApi {
           }
           resources.push({
             ...DefaultMyWellResource,
-            ...sn.data()
+            ...sn.data(),
+            id: sn.id,
           });
         });
         return resources;

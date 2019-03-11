@@ -305,7 +305,6 @@ describe('User Api', function() {
       });
     });
 
-
     it('merges together two users', async () => {
       //Arrange
       const expected = {
@@ -403,6 +402,37 @@ describe('User Api', function() {
       //This will clear nested subcollections.
       await userApi.userRef(orgId, oldUserId).delete();
       await userApi.userRef(orgId, newUserId).delete();
+    });
+  });
+
+  describe("getPendingResources", function() {
+    this.timeout(10000);
+    const firestore: Firestore = new MockFirestore({}).firestore();
+    const userApi = new UserApi(firestore, orgId);
+    const oldUserId = "old_user_1234";
+
+    const pendingResource = {
+      ...DefaultMyWellResource,
+    };
+    delete pendingResource.id;
+    const oldUserOwner = { name: "Lewis ji", createdByUserId: oldUserId };
+
+    this.beforeAll(async function() {
+      await userApi.userRef(orgId, oldUserId).collection('pendingResources').doc("custom_id").set({ ...pendingResource, owner: { ...oldUserOwner }, groups: { country: "IN", pincode: "313603" } });
+    });
+
+    it('if the resource has no id, gets the id from the snapshot', async () => {
+      //Arrange
+
+      //Act
+      const pendingResources = unsafeUnwrap(await userApi.getPendingResources(userApi.userRef(orgId, oldUserId)));
+
+      //Assert
+      assert.equal(pendingResources[0].id, 'custom_id');
+    });
+
+    this.afterAll(async function () {
+      await userApi.userRef(orgId, oldUserId).delete();
     });
   });
 });
