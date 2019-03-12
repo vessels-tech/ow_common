@@ -26,10 +26,7 @@ function safeGet(key: string, reading: Reading): string {
 export class ExportApi {
 
   public static readingsToExport(readings: Reading[], format: ExportFormat): string {
-    
-    return readings.reduce((acc, curr) => {
-      return acc + this.formatReading(curr, format) + '\n'
-    },'')
+    return readings.reduce((acc, curr) => acc + this.formatReading(curr, format) + '\n','')
   }
 
   public static formatReading(reading: Reading, format: ExportFormat): string {
@@ -38,21 +35,38 @@ export class ExportApi {
       separator = '\t';
     }
 
-    const eligibleKeys = [
-      'id',
-      'datetime',
-      'resourceId',
-      'resourceType',
-      'timeseriesId',
-      'value',
+    const eligibleKeys: Array<{id: string, accessor: (id: string) => string}> = [
+      {id: 'id', accessor: (id: string) => safeGet(id, reading) }, 
+
+      //Handle legacy timestamps from Firestore
+      {id: 'datetime', accessor: (id: string) => {
+        //@ts-ignore
+        let dateRaw: any = reading[id];
+        if (isNullOrUndefined(dateRaw)) {
+          return "";
+        }
+
+        // @ts-ignore
+        if (dateRaw.toDate) {
+          // @ts-ignore
+          const jsDate: Date = dateRaw.toDate();
+          return jsDate.toISOString()
+        }
+
+        return dateRaw;
+      }}, 
+      {id: 'resourceId', accessor: (id: string) => safeGet(id, reading) }, 
+      {id: 'resourceType', accessor: (id: string) => safeGet(id, reading) }, 
+      {id: 'timeseriesId', accessor: (id: string) => safeGet(id, reading) }, 
+      {id: 'value', accessor: (id: string) => safeGet(id, reading) }, 
 
       //Mywell fields:
-      'image',
-      'location',
+      { id: 'image', accessor: (id: string) => safeGet(id, reading) }, 
+      { id: 'location', accessor: (id: string) => safeGet(id, reading) }, 
     ];
 
     const formatted = eligibleKeys.reduce((acc, curr) => {
-      return acc + safeGet(curr, reading) + separator;
+      return acc + curr.accessor(curr.id) + separator;
     }, '');
 
     return formatted;

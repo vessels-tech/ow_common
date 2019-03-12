@@ -5,6 +5,7 @@ import MockFirestore from 'mock-cloud-firestore';
 
 import { DefaultReading } from '../model';
 import { ExportApi, ExportFormat } from './ExportApi';
+import { Timestamp } from '@google-cloud/firestore';
 
 // const {
 //   orgId,
@@ -14,7 +15,6 @@ import { ExportApi, ExportFormat } from './ExportApi';
 describe('Export Api', function () {
   this.timeout(5000);
   // const firestore: Firestore = new MockFirestore({}).firestore();
-
 
   this.beforeAll(async () => {
   
@@ -69,8 +69,21 @@ describe('Export Api', function () {
     assert.equal(result, expected);
   });
 
+  it('deserializes a legacy timestamp correctly', async () => {
+    //Arrange
+    const timestamp = new Timestamp(1483233061, 0);
+    const reading = { ...DefaultReading, datetime: timestamp, id: "00001" };
+    const format = ExportFormat.TSV;
+    const expected = `00001\t2017-01-01T01:11:01.000Z\tno_resource_id\twell\tno_timeseries_id\t0\t\t\t`;
 
+    //Act
+    // @ts-ignore
+    const result = ExportApi.formatReading(reading, format);
 
+    //Assert
+    assert.equal(result, expected);
+
+  });
 
   this.afterAll(async () => {
    

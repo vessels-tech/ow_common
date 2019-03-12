@@ -63,6 +63,7 @@ export class ResourceApi {
       return makeSuccess({
         ...DefaultResource,
         ...data,
+        id: sn.id,
       });
     })
     .catch((err: Error) => makeError<Resource>(err.message))
