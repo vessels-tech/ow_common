@@ -2,7 +2,7 @@
 import * as admin from "firebase-admin";
 import { DocumentSnapshot, CollectionReference, QueryDocumentSnapshot, QuerySnapshot } from "@google-cloud/firestore";
 import { Reading, DefaultReading } from "../model";
-import { SomeResult, safeLower, makeSuccess, makeError, ErrorResult, ResultType, chunkArray } from "../utils";
+import { SomeResult, safeLower, makeSuccess, makeError, ErrorResult, ResultType, chunkArray, safeGetNested } from "../utils";
 import btoa from 'btoa';
 
 type Firestore = admin.firestore.Firestore;
@@ -179,6 +179,30 @@ export class ReadingApi {
     }
 
     return makeSuccess(writeResults);
+  }
+
+  /**
+   * getReadingImage
+   * 
+   * Get the reading image for a given reading id
+   * 
+   * @param readingId - the hashed readingId
+   * @returns Promise<SomeResult<string>> - a base64 encoded string of the image in png format
+   */
+  public getReadingImage(readingId: string): Promise<SomeResult<string>> {
+    return this.readingCol().doc(readingId).get()
+      .then(doc => {
+        if (!doc.data()) {
+          return makeError(`No reading found for readingId: ${readingId}`);
+        }
+        const base64Image = safeGetNested(doc.data(), ['image', 'base64Image']);
+        if (!base64Image) {
+          return makeError(`No image found for readingId: ${readingId}`);
+        }
+
+        return makeSuccess(base64Image);
+      })
+      .catch(err => makeError(err.message));
   }
 
   public readingCol(): CollectionReference {

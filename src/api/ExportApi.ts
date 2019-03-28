@@ -1,5 +1,7 @@
 import { Reading } from "../model";
 import { isNullOrUndefined } from "util";
+import { Maybe, safeGetNested, isDefined } from "../utils";
+import { ReadingApi } from "./ReadingApi";
 
 
 export enum ExportFormat {
@@ -7,9 +9,8 @@ export enum ExportFormat {
   CSV='CSV',
 }
 
-
 /**
- * Saftely get a ket from the resource
+ * Saftely get a key from the resource
  */
 function safeGet(key: string, reading: Reading): string {
 
@@ -25,6 +26,33 @@ function safeGet(key: string, reading: Reading): string {
 
 export class ExportApi {
 
+  /**
+   * exportReadingImages
+   * 
+   * Export a set of images attached to a reading as an array of base64 strings
+   */
+  public static exportReadingImages(readings: Reading[]): Array<{ id: string, base64: string }> {
+    const readingImages: Array<{ id: string, base64: string }> = [];
+
+    readings.forEach(r => {
+      const image: Maybe<{ base64Image: string }> = safeGetNested(r, ['image']);
+      if (isDefined(image)) {
+        readingImages.push({
+          //TODO: timezones may make this buggy, and make hashed ids maligned
+          id: ReadingApi.hashReadingId(r.resourceId, r.timeseriesId, new Date(r.datetime)),
+          base64: image.base64Image
+        });
+      }
+    });
+
+    return readingImages;
+  }
+
+  /**
+   * readingsToExport
+   * 
+   * Format a set of readings for a given export format
+   */
   public static readingsToExport(readings: Reading[], format: ExportFormat): string {
     return readings.reduce((acc, curr) => acc + this.formatReading(curr, format) + '\n','')
   }
