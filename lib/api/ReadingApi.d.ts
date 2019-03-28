@@ -53,6 +53,15 @@ export declare class ReadingApi {
      * Save readings in bulk
      */
     bulkUploadReadings(readings: Reading[], batchSize: number): Promise<SomeResult<any>>;
+    /**
+     * getReadingImage
+     *
+     * Get the reading image for a given reading id
+     *
+     * @param readingId - the hashed readingId
+     * @returns Promise<SomeResult<string>> - a base64 encoded string of the image in png format
+     */
+    getReadingImage(readingId: string): Promise<SomeResult<string>>;
     readingCol(): CollectionReference;
     /**
      * The Id for a reading is generated as a hash of the

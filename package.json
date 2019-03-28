@@ -1,6 +1,6 @@
 {
   "name": "ow_common",
-  "version": "0.1.36",
+  "version": "0.1.37",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
