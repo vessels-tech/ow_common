@@ -1,5 +1,5 @@
 {
-  "name": "ow_common",
+  "name": "ow_common-kevindoveton",
   "version": "0.1.38-beta.0",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
