@@ -1,9 +1,9 @@
-import { Resource, PendingResource } from "./Resource";
-import { PendingReading } from "./Reading";
-import { TranslationEnum } from "ow_translations";
-import { DictType } from "../utils/DictType";
-import UserStatus from "../enums/UserStatus";
-import UserType from "../enums/UserType";
+import { Resource, PendingResource } from './Resource';
+import { PendingReading } from './Reading';
+import { TranslationEnum } from 'ow_translations';
+import { DictType } from '../utils/DictType';
+import UserStatus from '../enums/UserStatus';
+import UserType from '../enums/UserType';
 export declare type User = {
     id: string;
     favouriteResources: DictType<Resource>;
@@ -15,5 +15,9 @@ export declare type User = {
     status: UserStatus;
     translation: TranslationEnum;
     type: UserType;
+    name?: string;
+    mobile?: string;
+    email?: string;
+    nickname?: string;
 };
 export declare const DefaultUser: User;

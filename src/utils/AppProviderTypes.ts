@@ -64,7 +64,7 @@ export function resultsHasError(results: Array<SomeResult<any>>): boolean {
       return true;
     }
     return acc;
-  }, false);
+  }, <any>false);
 }
 
 /**
