@@ -40,7 +40,7 @@ export type PlaceResult = {
   boundingBox: number[],
 }
 
-export class SearchApi { 
+export class SearchApi {
   private firestore: Firestore;
   private orgId: string;
 
@@ -50,6 +50,123 @@ export class SearchApi {
     this.orgId = orgId;
   }
 
+  /**
+   * searchByLocationName
+   * 
+   */
+  async searchByLocationName(searchQuery: string, searchParams: SearchPageParams):
+    Promise<SomeResult<SearchResult<Array<PartialResourceResult>>>> {
+    console.log('searchByOwnerName')
+
+    //Build base query
+    //For some reason has to be any
+    let query: any = SearchApi.resourceCol(this.firestore, this.orgId)
+    .where(`locationName`, '>=', searchQuery)
+    .where(`locationName`, '<=', `${searchQuery}z`) //append a z to take advantage of string sort
+    //The nodejs api allows us to order by Id, but RN Firebase doesn't
+    .orderBy(`locationName`)
+
+    if (searchParams.lastVisible) {
+      query = query.startAfter(searchParams.lastVisible);
+    }
+    query = query.limit(safeLower(searchParams.limit, 100));
+
+    //Run the query
+    let lastVisible: QueryDocumentSnapshot;
+    return await query.get()
+    .then((sn: QuerySnapshot) => {
+      const queryResults: PartialResourceResult[] = [];
+      lastVisible = sn.docs[sn.docs.length - 1];
+
+      sn.forEach(doc => {
+        const data = doc.data();
+        if (data._id) {
+          return;
+        }
+        const result: PartialResourceResult = {
+          type: SearchResultType.PartialResourceResult,
+          id: data.id,
+          shortId: undefined,
+          groups: data.groups,
+          owner: data.owner,
+        };
+        queryResults.push(result);
+      });
+
+      return queryResults;
+    })
+    .then((results: any) => {
+      const searchResult: SearchResult<Array<PartialResourceResult>> = {
+        params: {
+          ...searchParams,
+          lastVisible,
+        },
+        results,
+        type: SearchResultType.PartialResourceResult,
+      };
+      return makeSuccess<SearchResult<Array<PartialResourceResult>>>(searchResult);
+    })
+    .catch((err: Error) => makeError<SearchResult<Array<PartialResourceResult>>>(err.message));
+  }
+
+  /**
+   * searchByOwnerName
+   * 
+   */
+  async searchByOwnerName(searchQuery: string, searchParams: SearchPageParams):
+    Promise<SomeResult<SearchResult<Array<PartialResourceResult>>>> {
+    console.log('searchByOwnerName')
+
+    //Build base query
+    //For some reason has to be any
+    let query: any = SearchApi.resourceCol(this.firestore, this.orgId)
+    .where(`owner.name`, '>=', searchQuery)
+    .where(`owner.name`, '<=', `${searchQuery}z`) //append a z to take advantage of string sort
+    //The nodejs api allows us to order by Id, but RN Firebase doesn't
+    .orderBy(`owner.name`)
+
+    if (searchParams.lastVisible) {
+      query = query.startAfter(searchParams.lastVisible);
+    }
+    query = query.limit(safeLower(searchParams.limit, 100));
+
+    //Run the query
+    let lastVisible: QueryDocumentSnapshot;
+    return await query.get()
+    .then((sn: QuerySnapshot) => {
+      const queryResults: PartialResourceResult[] = [];
+      lastVisible = sn.docs[sn.docs.length - 1];
+
+      sn.forEach(doc => {
+        const data = doc.data();
+        if (data._id) {
+          return;
+        }
+        const result: PartialResourceResult = {
+          type: SearchResultType.PartialResourceResult,
+          id: data.id,
+          shortId: undefined,
+          groups: data.groups,
+          owner: data.owner,
+        };
+        queryResults.push(result);
+      });
+
+      return queryResults;
+    })
+    .then((results: any) => {
+      const searchResult: SearchResult<Array<PartialResourceResult>> = {
+        params: {
+          ...searchParams,
+          lastVisible,
+        },
+        results,
+        type: SearchResultType.PartialResourceResult,
+      };
+      return makeSuccess<SearchResult<Array<PartialResourceResult>>>(searchResult);
+    })
+    .catch((err: Error) => makeError<SearchResult<Array<PartialResourceResult>>>(err.message));
+  }
 
   /**
    * searchForPlaceName

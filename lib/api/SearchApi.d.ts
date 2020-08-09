@@ -38,6 +38,16 @@ export declare class SearchApi {
     private orgId;
     constructor(firestore: Firestore, orgId: string);
     /**
+     * searchByLocationName
+     *
+     */
+    searchByLocationName(searchQuery: string, searchParams: SearchPageParams): Promise<SomeResult<SearchResult<Array<PartialResourceResult>>>>;
+    /**
+     * searchByOwnerName
+     *
+     */
+    searchByOwnerName(searchQuery: string, searchParams: SearchPageParams): Promise<SomeResult<SearchResult<Array<PartialResourceResult>>>>;
+    /**
      * searchForPlaceName
      *
      * Lookup a place based on a place name. Uses the free nominatim api.
