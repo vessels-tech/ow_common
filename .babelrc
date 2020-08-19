@@ -1,13 +1,13 @@
 {
   "presets": [
     "@babel/env",
-    "@babel/typescript",
+    "@babel/typescript"
   ],
   "plugins": [
-    "@babel/proposal-class-properties",
+    "@babel/plugin-proposal-class-properties",
     "@babel/plugin-proposal-export-default-from",
-    "@babel/proposal-object-rest-spread",
-    "@babel/plugin-transform-regenerator",
+    "@babel/plugin-proposal-object-rest-spread",
+    "@babel/plugin-transform-regenerator"
   ],
   "ignore": [
     "**/test",     //ignore the whole test directory
